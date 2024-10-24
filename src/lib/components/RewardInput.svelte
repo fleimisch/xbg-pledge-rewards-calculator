@@ -6,7 +6,7 @@
 </script>
 
 <div class="multiplierSetting p-6 rounded-lg">
-	<label class="block mb-2">{label}</label>
+	<label class="block mb-2 text-sm">{label}</label>
 	<input
 		type="number"
 		bind:value
@@ -18,6 +18,9 @@
 </div>
 
 <style>
+	label {
+		min-height: 40px;
+	}
 	.multiplierSetting {
 		background: hsla(240, 2%, 76%, 0.15);
 		border: 1px solid rgba(91, 91, 94, 0.55);
