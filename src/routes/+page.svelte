@@ -181,6 +181,12 @@
 			<RewardChart {monthlyRewards} />
 		{/key}
 
-		<p class="text-sm text-gray-400 mt-2">Developed by Apeinzoo & April Zoe</p>
+		<p class="text-sm text-gray-400 mt-2">
+			Developed by <a class="text-blue-200" href="https://x.com/apeinzoo" target="_blank"
+				>Apeinzoo</a
+			>
+			&
+			<a class="text-blue-200" href="https://x.com/April_Zoe_AZ" target="_blank">April Zoe</a>
+		</p>
 	</div>
 </div>
