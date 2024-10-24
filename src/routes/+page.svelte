@@ -139,10 +139,10 @@
 		</div>
 
 		<div class="bg-gray-800 p-6 rounded-lg mb-8">
-			<h3 class="text-xl font-semibold mb-2">Staking Summary</h3>
+			<h3 class="text-xl font-semibold mb-2">Summary</h3>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div>
-					<h3 class="text-xl font-semibold mb-2">Total Staked with Multipliers:</h3>
+					<h3 class="text-xl font-semibold mb-2">Total Pledged with Multipliers:</h3>
 					<p class="text-2xl text-green-400">{effectiveStakedAmount.toFixed(2)} XBG</p>
 				</div>
 			</div>
