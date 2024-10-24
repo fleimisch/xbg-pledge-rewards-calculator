@@ -181,5 +181,6 @@
 		{#key monthlyRewards}
 			<RewardChart {monthlyRewards} />
 		{/key}
+		test
 	</div>
 </div>
