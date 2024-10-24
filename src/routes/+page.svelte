@@ -17,7 +17,6 @@
 	// NFT bonuses
 	$: prometheusBonus = prometheusCount * 0.2; // 20% per Prometheus
 	$: chestplateBonus = chestplateCount * 0.025; // 2.5% per Chestplate
-
 	// Governance and streak bonuses
 	$: governanceBonus = governanceVotes > 0 ? 0.1 : 0; // 10% for voters
 	$: streakBonus = Math.min(seasonStreaks * 0.05, 1.0); // 5% per season, capped at 100%
