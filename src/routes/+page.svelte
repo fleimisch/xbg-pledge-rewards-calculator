@@ -64,8 +64,27 @@
 	$: poolUtilization = (totalStakedXBG / REWARDS_POOL_LIMIT) * 100;
 </script>
 
-<div id="frame" class="min-h-screen text-white p-8">
-	<div class="max-w-4xl mx-auto">
+<div id="frame" class="min-h-screen text-white p-8 relative">
+	<div class="beam">
+		<div class="header__beam" style="filter: blur(100px);position: relative;">
+			<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 196 1122" fill="none"
+				><ellipse cx="98" cy="561" rx="98" ry="561" fill="url(#paint0_linear_2401_533)"
+				></ellipse><defs
+					><linearGradient
+						id="paint0_linear_2401_533"
+						x1="98"
+						y1="0"
+						x2="98"
+						y2="1122"
+						gradientUnits="userSpaceOnUse"
+						><stop stop-color="#D9D9D9"></stop><stop offset="1" stop-opacity="0"
+						></stop></linearGradient
+					></defs
+				></svg
+			>
+		</div>
+	</div>
+	<div class="max-w-4xl mx-auto" style="z-index: 2;">
 		<h1 class="text-3xl font-bold mb-2" style="">XBorg Pledging Rewards Calculator</h1>
 		<p class="text-gray-400 mb-8">Boost Your Rewards with NFTs and Voting</p>
 
@@ -202,5 +221,16 @@
 	.multiplierSetting {
 		background: hsla(240, 2%, 76%, 0.15);
 		border: 1px solid rgba(91, 91, 94, 0.25);
+	}
+
+	.beam {
+		z-index: 1;
+		position: absolute;
+		inset: auto auto 10% 30%;
+		transform: rotate(-45deg);
+		top: -500px;
+		left: 60%;
+		pointer-events: none;
+		opacity: 0.35;
 	}
 </style>
