@@ -85,8 +85,10 @@
 		</div>
 	</div>
 	<div class="max-w-4xl mx-auto" style="z-index: 2;">
-		<h1 class="text-3xl font-bold mb-2" style="">XBorg Pledging Rewards Calculator</h1>
-		<p class="text-gray-400 mb-8">Boost Your Rewards with NFTs and Voting</p>
+		<h1 class="page-title md:text-6xl lg:text-7xl text-5xl font-bold mb-7 mx-auto" style="">
+			<small>XBorg Pledge</small>Rewards Calculator
+		</h1>
+		<p class="text-gray-400 mb-8 mx-auto text-center">Boost Your Rewards with NFTs and Voting</p>
 
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
 			<RewardInput id="xbg-amount" label="XBG Amount You Pledged" bind:value={xbgAmount} min={0} />
@@ -220,6 +222,31 @@
 </div>
 
 <style>
+	.page-title {
+		display: block;
+		width: 100%;
+		text-align: center;
+		text-transform: uppercase;
+		font-family: var(--font-soehne-breit);
+		/* font-size: 72px;
+		line-height: 65px; */
+		font-weight: 800;
+		letter-spacing: -0.848px;
+		text-transform: uppercase;
+		max-width: 480px;
+		text-align: center;
+		background: linear-gradient(92deg, #fff 45.37%, #696969);
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+	.page-title small {
+		display: block;
+		font-size: 24px;
+		line-height: 26px;
+		margin-bottom: 1em;
+	}
+
 	h1 {
 		text-transform: uppercase;
 	}
