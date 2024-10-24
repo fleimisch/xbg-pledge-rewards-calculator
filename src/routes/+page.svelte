@@ -1,168 +1,185 @@
 <script lang="ts">
-  import RewardInput from '$lib/components/RewardInput.svelte';
-  import RewardStats from '$lib/components/RewardStats.svelte';
-  import RewardChart from '$lib/components/RewardChart.svelte';
-  import { writable } from 'svelte/store';
+	import RewardInput from '$lib/components/RewardInput.svelte';
+	import RewardStats from '$lib/components/RewardStats.svelte';
+	import RewardChart from '$lib/components/RewardChart.svelte';
+	import { writable } from 'svelte/store';
 
-  const REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
-  let totalStakedXBG = 94_000_000; // 50M XBG tokens staked by all users
-  let currentXBGPrice = 0.25
-  let xbgAmount = 283000;
-  let prometheusCount = 2;
-  let chestplateCount = 1;
-  let governanceVotes = 1;
-  let seasonStreaks = 2;
-  let accumulateRewards = writable(true);
+	const REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
+	let totalStakedXBG = 94_000_000; // 50M XBG tokens staked by all users
+	let currentXBGPrice = 0.25;
+	let xbgAmount = 283000;
+	let prometheusCount = 2;
+	let chestplateCount = 1;
+	let governanceVotes = 1;
+	let seasonStreaks = 2;
+	let accumulateRewards = writable(true);
 
-  // NFT bonuses
-  $: prometheusBonus = prometheusCount * 0.20; // 20% per Prometheus
-  $: chestplateBonus = chestplateCount * 0.025; // 2.5% per Chestplate
+	// NFT bonuses
+	$: prometheusBonus = prometheusCount * 0.2; // 20% per Prometheus
+	$: chestplateBonus = chestplateCount * 0.025; // 2.5% per Chestplate
 
-  // Governance and streak bonuses
-  $: governanceBonus = governanceVotes > 0 ? 0.10 : 0; // 10% for voters
-  $: streakBonus = Math.min(seasonStreaks * 0.05, 1.0); // 5% per season, capped at 100%
+	// Governance and streak bonuses
+	$: governanceBonus = governanceVotes > 0 ? 0.1 : 0; // 10% for voters
+	$: streakBonus = Math.min(seasonStreaks * 0.05, 1.0); // 5% per season, capped at 100%
 
-  // Calculate total multiplier (all bonuses are additive)
-  $: totalMultiplier = 1 + prometheusBonus + chestplateBonus + governanceBonus + streakBonus;
+	// Calculate total multiplier (all bonuses are additive)
+	$: totalMultiplier = 1 + prometheusBonus + chestplateBonus + governanceBonus + streakBonus;
 
-  // Calculate total staked amount including multiplier
-  $: effectiveStakedAmount = xbgAmount * totalMultiplier;
+	// Calculate total staked amount including multiplier
+	$: effectiveStakedAmount = xbgAmount * totalMultiplier;
 
-  // Calculate rewards with pool limit consideration
-  $: poolShare = effectiveStakedAmount / totalStakedXBG;
-  $: adjustedMonthlyReward = Math.min(effectiveStakedAmount, (REWARDS_POOL_LIMIT) * poolShare);
+	// Calculate rewards with pool limit consideration
+	$: poolShare = effectiveStakedAmount / totalStakedXBG;
+	$: adjustedMonthlyReward = Math.min(
+		effectiveStakedAmount,
+		REWARDS_POOL_LIMIT * poolShare
+	) as number;
 
-  $: monthlyRewards = Array.from({ length: 12 }, (_, i) => {
-    if ($accumulateRewards) {
-      let cumulativeStaked = effectiveStakedAmount;
-      let cumulativeReward = 0;
-      for (let j = 0; j <= i; j++) {
-        let monthlyReward = Math.min(cumulativeStaked, (REWARDS_POOL_LIMIT) * (cumulativeStaked / totalStakedXBG));
-        cumulativeReward += monthlyReward;
-        cumulativeStaked += monthlyReward;
-      }
-      return {
-        month: i + 1,
-        reward: cumulativeReward / (i + 1),
-        cumulative: cumulativeReward
-      };
-    } else {
-      return {
-        month: i + 1,
-        reward: adjustedMonthlyReward,
-        cumulative: adjustedMonthlyReward * (i + 1)
-      };
-    }
-  });
+	$: monthlyRewards = Array.from({ length: 12 }, (_, i) => {
+		if ($accumulateRewards) {
+			let cumulativeStaked = effectiveStakedAmount;
+			let cumulativeReward = 0;
+			for (let j = 0; j <= i; j++) {
+				let monthlyReward = Math.min(
+					cumulativeStaked,
+					REWARDS_POOL_LIMIT * (cumulativeStaked / totalStakedXBG)
+				);
+				cumulativeReward += monthlyReward;
+				cumulativeStaked += monthlyReward;
+			}
+			return {
+				month: i + 1,
+				reward: cumulativeReward / (i + 1),
+				cumulative: cumulativeReward
+			};
+		} else {
+			return {
+				month: i + 1,
+				reward: adjustedMonthlyReward,
+				cumulative: adjustedMonthlyReward * (i + 1)
+			};
+		}
+	});
 
-  $: effectiveAPY = (adjustedMonthlyReward * 12 / xbgAmount) * 100;
-  $: poolUtilization = (totalStakedXBG / REWARDS_POOL_LIMIT) * 100;
+	$: effectiveAPY = ((adjustedMonthlyReward * 12) / xbgAmount) * 100;
+	$: poolUtilization = (totalStakedXBG / REWARDS_POOL_LIMIT) * 100;
 </script>
 
 <div class="min-h-screen bg-gray-900 text-white p-8">
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold mb-2">XBorg Pledging Calculator</h1>
-    <p class="text-gray-400 mb-8">Season 3 - Boost Your Rewards with NFTs and Voting</p>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-      <RewardInput id="xbg-amount" label="XBG Amount"  
-        bind:value={xbgAmount} 
-        min={0}
-      />
-      <RewardInput id="prometheus-nfts" label="Prometheus NFTs"  
-        bind:value={prometheusCount} 
-        min={0}
-      />
-      <RewardInput id="chestplate-nfts" label="Chestplate NFTs"  
-        bind:value={chestplateCount} 
-        min={0}
-      />
-      <RewardInput id="governance-votes" label="Governance Votes"  
-        bind:value={governanceVotes} 
-        min={0}
-        max={1}
-      />
-      <RewardInput id="season-streaks" label="Season Streaks"  
-        bind:value={seasonStreaks} 
-        min={0}
-        max={20}
-      />
-      <RewardInput id="total-staked-xbg" label="Total Staked XBG"  
-        bind:value={totalStakedXBG} 
-        min={0}
-      />
-      <RewardInput id="total-staked-xbg" label="Current XBG Price"  
-        bind:value={currentXBGPrice} 
-        min={0}
-      />
-      <label for="accumulate-rewards" class="flex items-center mt-4">
-        <input type="checkbox" id="accumulate-rewards" bind:checked={$accumulateRewards} class="form-checkbox h-5 w-5 text-blue-600" />
-        <span class="ml-2 text-gray-400">Accumulate Monthly Rewards</span>
-      </label>
-    </div>
+	<div class="max-w-4xl mx-auto">
+		<h1 class="text-3xl font-bold mb-2">XBorg Pledging Calculator</h1>
+		<p class="text-gray-400 mb-8">Season 3 - Boost Your Rewards with NFTs and Voting</p>
 
-    <div class="bg-gray-800 p-6 rounded-lg mb-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        <RewardStats 
-          label="Prometheus Bonus" 
-          value={prometheusBonus * 100} 
-          color="text-blue-400"
-        />
-        <RewardStats 
-          label="Chestplate Bonus" 
-          value={chestplateBonus * 100} 
-          color="text-purple-400"
-        />
-        <RewardStats 
-          label="Governance Bonus" 
-          value={governanceBonus * 100} 
-          color="text-yellow-400"
-        />
-        <RewardStats 
-          label="Streak Bonus" 
-          value={streakBonus * 100} 
-          color="text-red-400"
-        />
-        <RewardStats 
-          label="Pool Utilization" 
-          value={poolUtilization} 
-          color="text-orange-400"
-        />
-      </div>
-    </div>
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+			<RewardInput id="xbg-amount" label="XBG Amount" bind:value={xbgAmount} min={0} />
+			<RewardInput
+				id="prometheus-nfts"
+				label="Prometheus NFTs"
+				bind:value={prometheusCount}
+				min={0}
+			/>
+			<RewardInput
+				id="chestplate-nfts"
+				label="Chestplate NFTs"
+				bind:value={chestplateCount}
+				min={0}
+			/>
+			<RewardInput
+				id="governance-votes"
+				label="Governance Votes"
+				bind:value={governanceVotes}
+				min={0}
+				max={1}
+			/>
+			<RewardInput
+				id="season-streaks"
+				label="Season Streaks"
+				bind:value={seasonStreaks}
+				min={0}
+				max={20}
+			/>
+			<RewardInput
+				id="total-staked-xbg"
+				label="Total Staked XBG"
+				bind:value={totalStakedXBG}
+				min={0}
+			/>
+			<RewardInput
+				id="total-staked-xbg"
+				label="Current XBG Price"
+				bind:value={currentXBGPrice}
+				min={0}
+			/>
+			<label for="accumulate-rewards" class="flex items-center mt-4">
+				<input
+					type="checkbox"
+					id="accumulate-rewards"
+					bind:checked={$accumulateRewards}
+					class="form-checkbox h-5 w-5 text-blue-600"
+				/>
+				<span class="ml-2 text-gray-400">Accumulate Monthly Rewards</span>
+			</label>
+		</div>
 
-    <div class="bg-gray-800 p-6 rounded-lg mb-8">
-      <h3 class="text-xl font-semibold mb-2">Staking Summary</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <h3 class="text-xl font-semibold mb-2">Total Staked with Multipliers:</h3>
-          <p class="text-2xl text-green-400">{effectiveStakedAmount.toFixed(2)} XBG</p>
-        </div>
-      </div>
-    </div>
+		<div class="bg-gray-800 p-6 rounded-lg mb-8">
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+				<RewardStats label="Prometheus Bonus" value={prometheusBonus * 100} color="text-blue-400" />
+				<RewardStats
+					label="Chestplate Bonus"
+					value={chestplateBonus * 100}
+					color="text-purple-400"
+				/>
+				<RewardStats
+					label="Governance Bonus"
+					value={governanceBonus * 100}
+					color="text-yellow-400"
+				/>
+				<RewardStats label="Streak Bonus" value={streakBonus * 100} color="text-red-400" />
+				<RewardStats label="Pool Utilization" value={poolUtilization} color="text-orange-400" />
+			</div>
+		</div>
 
-    <div class="bg-gray-800 p-6 rounded-lg mb-8">
-      <h3 class="text-xl font-semibold mb-2">Rewards Summary</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <p class="text-sm text-gray-400">Monthly Rewards:</p>
-          <p class="text-2xl text-yellow-400">{adjustedMonthlyReward.toFixed(2)} XBG (~${Math.round(currentXBGPrice * adjustedMonthlyReward.toFixed(2)).toFixed(2)})</p>
-        </div>
-        <div>
-          <p class="text-sm text-gray-400">Annual Rewards:</p>
-          <p class="text-2xl text-yellow-400">{(adjustedMonthlyReward * 12).toFixed(2)} XBG (~${Math.round(currentXBGPrice * (adjustedMonthlyReward 
-          *12).toFixed(2)).toFixed(2)})</p>
-        </div>
-      </div>
-      <p class="text-sm text-gray-400 mt-2">
-        Effective APY: {effectiveAPY.toFixed(2)}%
-        {#if (xbgAmount * totalMultiplier) / 12 > adjustedMonthlyReward}
-          <span class="text-orange-400 ml-2">(Limited by rewards pool)</span>
-        {/if}
-      </p>
-      <p class="text-xs text-gray-500 mt-1">Pool Share: {(poolShare * 100).toFixed(4)}%</p>
-    </div>
+		<div class="bg-gray-800 p-6 rounded-lg mb-8">
+			<h3 class="text-xl font-semibold mb-2">Staking Summary</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<h3 class="text-xl font-semibold mb-2">Total Staked with Multipliers:</h3>
+					<p class="text-2xl text-green-400">{effectiveStakedAmount.toFixed(2)} XBG</p>
+				</div>
+			</div>
+		</div>
 
-    <RewardChart {monthlyRewards} />
-  </div>
+		<div class="bg-gray-800 p-6 rounded-lg mb-8">
+			<h3 class="text-xl font-semibold mb-2">Rewards Summary</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+				<div>
+					<p class="text-sm text-gray-400">Monthly Rewards:</p>
+					<p class="text-2xl text-yellow-400">
+						{adjustedMonthlyReward.toFixed(2)} XBG (~${Math.round(
+							currentXBGPrice * Number(adjustedMonthlyReward.toFixed(2))
+						).toFixed(2)})
+					</p>
+				</div>
+				<div>
+					<p class="text-sm text-gray-400">Annual Rewards:</p>
+					<p class="text-2xl text-yellow-400">
+						{(adjustedMonthlyReward * 12).toFixed(2)} XBG (~${Math.round(
+							currentXBGPrice * Number((adjustedMonthlyReward * 12).toFixed(2))
+						).toFixed(2)})
+					</p>
+				</div>
+			</div>
+			<p class="text-sm text-gray-400 mt-2">
+				Effective APY: {effectiveAPY.toFixed(2)}%
+				{#if (xbgAmount * totalMultiplier) / 12 > adjustedMonthlyReward}
+					<span class="text-orange-400 ml-2">(Limited by rewards pool)</span>
+				{/if}
+			</p>
+			<p class="text-xs text-gray-500 mt-1">Pool Share: {(poolShare * 100).toFixed(4)}%</p>
+		</div>
+
+		{#key monthlyRewards}
+			<RewardChart {monthlyRewards} />
+		{/key}
+	</div>
 </div>
