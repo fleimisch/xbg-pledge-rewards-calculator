@@ -157,13 +157,11 @@
 				<RewardStats label="Pool Utilization" value={poolUtilization} />
 				<RewardStats label="Total Multiplier" value={totalMultiplier} suffix="" />
 			</div>
-		</div>
-
-		<div class="multiplierSetting p-6 rounded-lg mb-8">
-			<h3 class="font-semibold mb-2 text-sm text-gray-500">Summary</h3>
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<div class="grid grid-cols-1 md:grid-cols-1 gap-4 border-t border-gray-600 pt-4">
 				<div>
-					<h3 class="text-xl font-semibold mb-2">Total Pledged with Multipliers:</h3>
+					<h3 class="text-sm text-gray-500 font-semibold mb-2">
+						Your Total Pledge Amount Including Multipliers:
+					</h3>
 					<p class="text-2xl text-green-400">{effectiveStakedAmount.toFixed(2)} XBG</p>
 				</div>
 			</div>
