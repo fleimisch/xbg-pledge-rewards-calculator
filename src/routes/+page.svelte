@@ -64,9 +64,9 @@
 	$: poolUtilization = (totalStakedXBG / REWARDS_POOL_LIMIT) * 100;
 </script>
 
-<div class="min-h-screen bg-gray-900 text-white p-8">
+<div id="frame" class="min-h-screen text-white p-8">
 	<div class="max-w-4xl mx-auto">
-		<h1 class="text-3xl font-bold mb-2">XBorg Pledging Rewards Calculator</h1>
+		<h1 class="text-3xl font-bold mb-2" style="">XBorg Pledging Rewards Calculator</h1>
 		<p class="text-gray-400 mb-8">Boost Your Rewards with NFTs and Voting</p>
 
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -120,7 +120,7 @@
 			</label>
 		</div>
 
-		<div class="bg-gray-800 p-6 rounded-lg mb-8">
+		<div class="multiplierSetting p-6 rounded-lg mb-8">
 			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
 				<RewardStats label="Prometheus Bonus" value={prometheusBonus * 100} color="text-blue-400" />
 				<RewardStats
@@ -138,7 +138,7 @@
 			</div>
 		</div>
 
-		<div class="bg-gray-800 p-6 rounded-lg mb-8">
+		<div class="multiplierSetting p-6 rounded-lg mb-8">
 			<h3 class="text-xl font-semibold mb-2">Summary</h3>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div>
@@ -148,7 +148,7 @@
 			</div>
 		</div>
 
-		<div class="bg-gray-800 p-6 rounded-lg mb-8">
+		<div class="multiplierSetting p-6 rounded-lg mb-8">
 			<h3 class="text-xl font-semibold mb-2">Rewards Summary</h3>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div>
@@ -190,3 +190,17 @@
 		</p>
 	</div>
 </div>
+
+<style>
+	h1 {
+		text-transform: uppercase;
+	}
+	#frame {
+		background-color: #050505;
+	}
+
+	.multiplierSetting {
+		background: hsla(240, 2%, 76%, 0.15);
+		border: 1px solid rgba(91, 91, 94, 0.25);
+	}
+</style>

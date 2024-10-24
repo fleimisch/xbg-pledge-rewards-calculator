@@ -67,6 +67,13 @@
 	});
 </script>
 
-<div class="bg-gray-800 p-6 rounded-lg" style="height: 400px">
+<div class="multiplierSetting p-6 rounded-lg" style="height: 400px">
 	<canvas bind:this={chartCanvas}></canvas>
 </div>
+
+<style>
+	.multiplierSetting {
+		background: hsla(240, 2%, 76%, 0.15);
+		border: 1px solid rgba(91, 91, 94, 0.25);
+	}
+</style>
