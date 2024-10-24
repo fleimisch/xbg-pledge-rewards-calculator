@@ -12,7 +12,7 @@
 	let chestplateCount = 1;
 	let governanceVotes = 1;
 	let seasonStreaks = 2;
-	let accumulateRewards = writable(true);
+	$: accumulateRewards = writable(true);
 
 	// NFT bonuses
 	$: prometheusBonus = prometheusCount * 0.2; // 20% per Prometheus
@@ -154,7 +154,7 @@
 				<div>
 					<p class="text-sm text-gray-400">Monthly Rewards:</p>
 					<p class="text-2xl text-yellow-400">
-						{adjustedMonthlyReward.toFixed(2)} XBG (~${Math.round(
+						~{Math.round(adjustedMonthlyReward)} XBG (~${Math.round(
 							currentXBGPrice * Number(adjustedMonthlyReward.toFixed(2))
 						).toFixed(2)})
 					</p>
@@ -162,7 +162,7 @@
 				<div>
 					<p class="text-sm text-gray-400">Annual Rewards:</p>
 					<p class="text-2xl text-yellow-400">
-						{(adjustedMonthlyReward * 12).toFixed(2)} XBG (~${Math.round(
+						~{Math.round(monthlyRewards[monthlyRewards.length - 1].cumulative)} XBG (~${Math.round(
 							currentXBGPrice * Number((adjustedMonthlyReward * 12).toFixed(2))
 						).toFixed(2)})
 					</p>
