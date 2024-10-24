@@ -147,30 +147,17 @@
 
 		<div class="multiplierSetting p-6 rounded-lg mb-8">
 			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-				<RewardStats label="Prometheus Bonus" value={prometheusBonus * 100} color="text-blue-400" />
-				<RewardStats
-					label="Chestplate Bonus"
-					value={chestplateBonus * 100}
-					color="text-purple-400"
-				/>
-				<RewardStats
-					label="Governance Bonus"
-					value={governanceBonus * 100}
-					color="text-yellow-400"
-				/>
-				<RewardStats label="Streak Bonus" value={streakBonus * 100} color="text-red-400" />
-				<RewardStats label="Pool Utilization" value={poolUtilization} color="text-orange-400" />
-				<RewardStats
-					label="Total Multiplier"
-					value={totalMultiplier}
-					color="text-green-400"
-					suffix=""
-				/>
+				<RewardStats label="Prometheus Bonus" value={prometheusBonus * 100} />
+				<RewardStats label="Chestplate Bonus" value={chestplateBonus * 100} />
+				<RewardStats label="Governance Bonus" value={governanceBonus * 100} />
+				<RewardStats label="Streak Bonus" value={streakBonus * 100} />
+				<RewardStats label="Pool Utilization" value={poolUtilization} />
+				<RewardStats label="Total Multiplier" value={totalMultiplier} suffix="" />
 			</div>
 		</div>
 
 		<div class="multiplierSetting p-6 rounded-lg mb-8">
-			<h3 class="text-xl font-semibold mb-2">Summary</h3>
+			<h3 class="font-semibold mb-2 text-sm text-gray-500">Summary</h3>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div>
 					<h3 class="text-xl font-semibold mb-2">Total Pledged with Multipliers:</h3>

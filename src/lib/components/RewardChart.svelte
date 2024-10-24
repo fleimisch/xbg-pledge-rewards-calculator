@@ -26,6 +26,10 @@
 				options: {
 					responsive: true,
 					maintainAspectRatio: false,
+					interaction: {
+						intersect: false,
+						mode: 'index'
+					},
 					plugins: {
 						legend: {
 							labels: {
@@ -33,6 +37,8 @@
 							}
 						},
 						tooltip: {
+							mode: 'index',
+							intersect: false,
 							callbacks: {
 								label: function (context) {
 									return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} XBG`;
