@@ -32,6 +32,7 @@
 					},
 					plugins: {
 						legend: {
+							display: false,
 							labels: {
 								color: '#fff'
 							}
@@ -49,21 +50,22 @@
 					scales: {
 						y: {
 							ticks: {
-								color: '#fff',
+								color: 'rgba(156, 163, 175, 0.5)',
 								callback: function (tickValue: number | string) {
 									return `${Number(tickValue).toFixed(0)} XBG`;
 								}
 							},
 							grid: {
-								color: '#444'
+								color: '#222'
 							}
 						},
 						x: {
 							ticks: {
-								color: '#fff'
+								color: 'rgba(156, 163, 175, 0.5)'
 							},
 							grid: {
-								color: '#444'
+								display: false,
+								color: '#222'
 							}
 						}
 					}
