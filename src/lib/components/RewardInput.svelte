@@ -1,20 +1,24 @@
 <script lang="ts">
-	export let label: string;
-	export let value: number;
+	export let label: string = '';
+	export let value: number = 0;
 	export let min: number = 0;
 	export let max: number | undefined = undefined;
 </script>
 
 <div class="multiplierSetting p-6 rounded-lg">
 	<label class="block mb-2 text-sm">{label}</label>
-	<input
-		type="number"
-		bind:value
-		{min}
-		{max}
-		{...$$restProps}
-		class="w-full multiplierInput text-white px-4 py-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
-	/>
+	{#if !$$slots.default}
+		<input
+			type="number"
+			bind:value
+			{min}
+			{max}
+			{...$$restProps}
+			class="w-full multiplierInput text-white px-4 py-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+		/>
+	{:else}
+		<slot />
+	{/if}
 </div>
 
 <style>

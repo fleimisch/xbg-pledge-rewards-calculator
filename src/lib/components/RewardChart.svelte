@@ -79,7 +79,7 @@
 
 <style>
 	.multiplierSetting {
-		background: hsla(240, 2%, 76%, 0.15);
+		background: hsla(240, 2%, 76%, 0.05);
 		border: 1px solid rgba(91, 91, 94, 0.25);
 	}
 </style>
