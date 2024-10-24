@@ -64,7 +64,7 @@
 	$: poolUtilization = (totalStakedXBG / REWARDS_POOL_LIMIT) * 100;
 </script>
 
-<div id="frame" class="min-h-screen text-white p-8 relative">
+<div id="frame" class="min-h-screen text-white p-8 relative" style="overflow-x: hidden;">
 	<div class="beam">
 		<div class="header__beam" style="filter: blur(100px);position: relative;">
 			<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 196 1122" fill="none"
