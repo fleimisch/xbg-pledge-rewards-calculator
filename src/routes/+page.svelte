@@ -118,7 +118,7 @@
 			/>
 			<RewardInput
 				id="total-staked-xbg"
-				label="Total XBG Pledged (All Users)"
+				label="Total XBG Pledged (All Users / Current Season)"
 				bind:value={totalStakedXBG}
 				min={0}
 			/>
