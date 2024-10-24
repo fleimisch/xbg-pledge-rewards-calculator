@@ -66,7 +66,7 @@
 
 <div class="min-h-screen bg-gray-900 text-white p-8">
 	<div class="max-w-4xl mx-auto">
-		<h1 class="text-3xl font-bold mb-2">XBorg Pledging Calculator</h1>
+		<h1 class="text-3xl font-bold mb-2">XBorg Pledging Rewards Calculator</h1>
 		<p class="text-gray-400 mb-8">Boost Your Rewards with NFTs and Voting</p>
 
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
