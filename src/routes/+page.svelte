@@ -4,7 +4,7 @@
 	import RewardChart from '$lib/components/RewardChart.svelte';
 	import { writable } from 'svelte/store';
 
-	const REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
+	let REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
 	let totalStakedXBG = 94_000_000; // 50M XBG tokens staked by all users
 	let currentXBGPrice = 0.25;
 	let xbgAmount = 283000;
@@ -126,6 +126,12 @@
 				id="total-staked-xbg"
 				label="Current XBG Price"
 				bind:value={currentXBGPrice}
+				min={0}
+			/>
+			<RewardInput
+				id="rewards-pool-limit"
+				label="XBG Season Rewards Pool"
+				bind:value={REWARDS_POOL_LIMIT}
 				min={0}
 			/>
 			<label for="accumulate-rewards" class="flex items-center mt-4">
