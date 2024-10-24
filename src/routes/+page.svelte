@@ -3,6 +3,7 @@
 	import RewardStats from '$lib/components/RewardStats.svelte';
 	import RewardChart from '$lib/components/RewardChart.svelte';
 	import { writable } from 'svelte/store';
+	import { onMount } from 'svelte';
 
 	let REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
 	let totalStakedXBG = 94_000_000; // 50M XBG tokens staked by all users
@@ -62,6 +63,14 @@
 
 	$: effectiveAPY = ((adjustedMonthlyReward * 12) / xbgAmount) * 100;
 	$: poolUtilization = (totalStakedXBG / REWARDS_POOL_LIMIT) * 100;
+
+	onMount(async () => {});
+
+	const formatter = new Intl.NumberFormat('en-US', {
+		style: 'decimal',
+		minimumFractionDigits: 0,
+		maximumFractionDigits: 2
+	});
 </script>
 
 <div id="frame" class="min-h-screen text-white p-8 relative" style="overflow-x: hidden;">
@@ -121,12 +130,13 @@
 			<RewardInput
 				id="total-staked-xbg"
 				label="Total XBG Pledged (All Users / Current Season)"
+				link="https://xbg.xborg.com/analytics"
 				bind:value={totalStakedXBG}
 				min={0}
 			/>
 			<RewardInput
 				id="total-staked-xbg"
-				label="Current XBG Price"
+				label="Current XBG Price (in $)"
 				bind:value={currentXBGPrice}
 				min={0}
 			/>
@@ -222,6 +232,16 @@
 </div>
 
 <style>
+	#nebula-element {
+		display: block;
+		width: 100%;
+		height: 100%;
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 1;
+		pointer-events: none;
+	}
 	.page-title {
 		display: block;
 		width: 100%;
