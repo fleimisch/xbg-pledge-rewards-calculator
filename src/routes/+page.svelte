@@ -7,8 +7,8 @@
 	let REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
 	let totalStakedXBG = 94_000_000; // 50M XBG tokens staked by all users
 	let currentXBGPrice = 0.25;
-	let xbgAmount = 283000;
-	let prometheusCount = 2;
+	let xbgAmount = 100000;
+	let prometheusCount = 1;
 	let chestplateCount = 1;
 	let governanceVotes = 1;
 	let seasonStreaks = 2;
