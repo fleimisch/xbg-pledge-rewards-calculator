@@ -67,7 +67,7 @@
 <div class="min-h-screen bg-gray-900 text-white p-8">
 	<div class="max-w-4xl mx-auto">
 		<h1 class="text-3xl font-bold mb-2">XBorg Pledging Calculator</h1>
-		<p class="text-gray-400 mb-8">Season 3 - Boost Your Rewards with NFTs and Voting</p>
+		<p class="text-gray-400 mb-8">Boost Your Rewards with NFTs and Voting</p>
 
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
 			<RewardInput id="xbg-amount" label="XBG Amount" bind:value={xbgAmount} min={0} />
@@ -180,6 +180,7 @@
 		{#key monthlyRewards}
 			<RewardChart {monthlyRewards} />
 		{/key}
-		test
+
+		<p class="text-sm text-gray-400 mt-2">Developed by Apeinzoo & April Zoe</p>
 	</div>
 </div>
