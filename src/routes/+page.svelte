@@ -154,6 +154,12 @@
 				/>
 				<RewardStats label="Streak Bonus" value={streakBonus * 100} color="text-red-400" />
 				<RewardStats label="Pool Utilization" value={poolUtilization} color="text-orange-400" />
+				<RewardStats
+					label="Total Multiplier"
+					value={totalMultiplier}
+					color="text-green-400"
+					suffix=""
+				/>
 			</div>
 		</div>
 
