@@ -6,6 +6,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const CONTRACT_ADDRESS = '0x5A3E7Fd48d9E88C22C391e0E4836C8e211DAeE66';
 const ETHERSCAN_API = 'https://api.etherscan.io/api';
 
+
 let cachedData: any = null;
 let lastFetchTime: number = 0;
 
