@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
+	import { device } from '$lib/stores/device';
 
 	export let data: PageData;
 
@@ -113,7 +114,7 @@
 		</p>
 
 		<div class="multiplierSetting p-6 rounded-lg mb-8">
-			<div class="mb-4 flex gap-4">
+			<div class="mb-4 flex gap-4 flex-col md:flex-row">
 				<input
 					type="text"
 					placeholder="Search by wallet address or token ID..."
@@ -136,20 +137,20 @@
 				<div class="text-center text-red-400 py-8">{data.error}</div>
 			{:else}
 				<div class="overflow-x-auto">
-					<table class="w-full">
+					<table class="w-full" style={$device.isMobile ? 'zoom:0.8' : ''}>
 						<thead>
 							<tr class="text-left text-gray-400">
-								<th class="p-2">Token ID</th>
-								<th class="p-2">Current Holder</th>
-								<th class="p-2">Acquired</th>
-								<th class="p-2">Diamonds</th>
+								<th class="p-2 whitespace-nowrap">Token ID</th>
+								<th class="p-2 whitespace-nowrap">Current Holder</th>
+								<th class="p-2 text-center whitespace-nowrap">Acquired</th>
+								<th class="p-2 text-center whitespace-nowrap">Diamonds</th>
 							</tr>
 						</thead>
 						<tbody>
 							{#each filteredNFTs as nft}
 								<tr class="border-t border-gray-800">
-									<td class="p-2">#{nft.tokenId}</td>
-									<td class="p-2">
+									<td class="p-2 whitespace-nowrap">#{nft.tokenId}</td>
+									<td class="p-2 whitespace-nowrap">
 										<a
 											href={`https://etherscan.io/address/${nft.currentHolder}`}
 											target="_blank"
@@ -159,9 +160,11 @@
 											{nft.currentHolder}
 										</a>
 									</td>
-									<td class="p-2">{formatDate(nft.acquisitionTimestamp)}</td>
-									<td class="p-2">
-										<div class="flex items-center gap-1">
+									<td class="p-2 text-center whitespace-nowrap">
+										{formatDate(nft.acquisitionTimestamp)}
+									</td>
+									<td class="p-2 text-center whitespace-nowrap">
+										<div class="flex items-center gap-1 justify-center">
 											{getDiamondEmojis(nft.diamonds ?? 0)}
 										</div>
 									</td>

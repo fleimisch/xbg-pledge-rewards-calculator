@@ -7,4 +7,6 @@
 body {
     font-family: 'Roboto Mono', monospace;
 	font-display: swap;
+    background-color: #050505;
+    overflow-x: hidden;
 }
