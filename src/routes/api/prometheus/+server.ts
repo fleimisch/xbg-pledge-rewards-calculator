@@ -11,7 +11,7 @@ let lastFetchTime: number = 0;
 
 export const GET: RequestHandler = async () => {
     try {
-        if (!ETHERSCAN_API_KEY) {
+        if (!PRIVATE_ETHERSCAN_API_KEY) {
             throw new Error('ETHERSCAN_API_KEY is not set');
         }
 
