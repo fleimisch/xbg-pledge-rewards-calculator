@@ -14,13 +14,5 @@ export default defineConfig({
 		'process.env.NODE_ENV': JSON.stringify('development'), // for tippy.js
 		'process.env.DEVICE': JSON.stringify('desktop'),
 		'process.env.PRODUCTION': production,
-	},
-	server: {
-		fs: {
-			allow: ['.']
-		}
-	},
-	ssr: {
-		noExternal: ['chart.js']
 	}
 });
