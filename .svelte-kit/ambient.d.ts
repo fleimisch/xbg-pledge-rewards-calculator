@@ -27,6 +27,8 @@
  */
 declare module '$env/static/private' {
 	export const ETHERSCAN_API_KEY: string;
+	export const UPSTASH_REDIS_REST_URL: string;
+	export const UPSTASH_REDIS_REST_TOKEN: string;
 	export const ALLUSERSPROFILE: string;
 	export const APPDATA: string;
 	export const ChocolateyInstall: string;
@@ -145,6 +147,8 @@ declare module '$env/static/public' {
 declare module '$env/dynamic/private' {
 	export const env: {
 		ETHERSCAN_API_KEY: string;
+		UPSTASH_REDIS_REST_URL: string;
+		UPSTASH_REDIS_REST_TOKEN: string;
 		ALLUSERSPROFILE: string;
 		APPDATA: string;
 		ChocolateyInstall: string;
