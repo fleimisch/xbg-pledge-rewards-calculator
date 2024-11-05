@@ -2,18 +2,13 @@ import { ETHERSCAN_API_KEY } from '$env/static/private';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 const CONTRACT_ADDRESS = '0x5A3E7Fd48d9E88C22C391e0E4836C8e211DAeE66';
 const ETHERSCAN_API = 'https://api.etherscan.io/api';
 
-let cachedData: any = null;
-let lastFetchTime: number = 0;
-
 export const GET: RequestHandler = async () => {
     try {
-        // Check memory cache
-        if (cachedData && (Date.now() - lastFetchTime) < CACHE_DURATION) {
-            return json(cachedData);
+        if (!ETHERSCAN_API_KEY) {
+            throw new Error('ETHERSCAN_API_KEY is not set');
         }
 
         const response = await fetch(
@@ -38,13 +33,9 @@ export const GET: RequestHandler = async () => {
             });
         });
 
-        // Convert map to array
+        // Convert map to array and sort
         const nfts = Array.from(nftMap.values())
             .sort((a, b) => a.tokenId - b.tokenId);
-
-        // Update cache
-        cachedData = nfts;
-        lastFetchTime = Date.now();
 
         return json(nfts);
     } catch (error) {
