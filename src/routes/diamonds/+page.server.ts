@@ -6,7 +6,7 @@ const ETHERSCAN_API = 'https://api.etherscan.io/api';
 const CACHE_DURATION = 24 * 60 * 60; // 24 hours in seconds
 const REDIS_KEY = 'prometheus_nfts_data';
 
-// Initialize Upstash Redis
+// Initialize Upstash Redis with environment variables
 const redis = new Redis({
     url: PRIVATE_UPSTASH_REDIS_REST_URL,
     token: PRIVATE_UPSTASH_REDIS_REST_TOKEN,
