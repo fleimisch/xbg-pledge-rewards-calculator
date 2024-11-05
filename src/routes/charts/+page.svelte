@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Chart from 'chart.js/auto';
-	import { api } from '$lib/services/api';
 
 	type CategoryData = {
 		name: string;
