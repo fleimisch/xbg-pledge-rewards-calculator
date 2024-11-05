@@ -1,4 +1,4 @@
-import { ETHERSCAN_API_KEY } from '$env/static/private';
+import { PRIVATE_ETHERSCAN_API_KEY } from '$env/static/private';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -17,7 +17,7 @@ export const GET: RequestHandler = async () => {
         }
 
         const response = await fetch(
-            `${ETHERSCAN_API}?module=account&action=tokennfttx&contractaddress=${CONTRACT_ADDRESS}&page=1&offset=10000&sort=asc&apikey=${ETHERSCAN_API_KEY}`
+            `${ETHERSCAN_API}?module=account&action=tokennfttx&contractaddress=${CONTRACT_ADDRESS}&page=1&offset=10000&sort=asc&apikey=${PRIVATE_ETHERSCAN_API_KEY}`
         );
 
         const data = await response.json();

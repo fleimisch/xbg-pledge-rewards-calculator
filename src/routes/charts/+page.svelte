@@ -1,7 +1,7 @@
-<script lang="ts">
+<!-- <script lang="ts">
 	import { onMount } from 'svelte';
 	import Chart from 'chart.js/auto';
-	import { api } from '$lib/services/api';
+	// import { api } from '$lib/services/api';
 
 	type CategoryData = {
 		name: string;
@@ -133,4 +133,4 @@
 			<canvas bind:this={chartCanvas}></canvas>
 		</div>
 	{/if}
-</div>
+</div> -->

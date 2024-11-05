@@ -1,7 +1,6 @@
 import type { PageServerLoad } from './$types';
-import { ETHERSCAN_API_KEY } from '$env/static/private';
 import { Redis } from '@upstash/redis';
-
+import {PRIVATE_UPSTASH_REDIS_REST_URL, PRIVATE_UPSTASH_REDIS_REST_TOKEN, PRIVATE_ETHERSCAN_API_KEY} from '$env/static/private';
 const CONTRACT_ADDRESS = '0x5A3E7Fd48d9E88C22C391e0E4836C8e211DAeE66';
 const ETHERSCAN_API = 'https://api.etherscan.io/api';
 const CACHE_DURATION = 24 * 60 * 60; // 24 hours in seconds
@@ -9,8 +8,8 @@ const REDIS_KEY = 'prometheus_nfts_data';
 
 // Initialize Upstash Redis
 const redis = new Redis({
-    url: 'https://allowed-panther-26708.upstash.io',
-    token: 'AWhUAAIjcDE3N2Q4Y2UxMzVmNzQ0YTlmOTIzY2E5ZGY0ZjUyZGU1MnAxMA',
+    url: PRIVATE_UPSTASH_REDIS_REST_URL,
+    token: PRIVATE_UPSTASH_REDIS_REST_TOKEN,
 });
 
 // In-memory fallback cache
@@ -77,7 +76,7 @@ export const load: PageServerLoad = async () => {
         // If no cache, fetch new data
         console.log('Fetching fresh data');
         const response = await fetch(
-            `${ETHERSCAN_API}?module=account&action=tokennfttx&contractaddress=${CONTRACT_ADDRESS}&page=1&offset=10000&sort=asc&apikey=${ETHERSCAN_API_KEY}`
+            `${ETHERSCAN_API}?module=account&action=tokennfttx&contractaddress=${CONTRACT_ADDRESS}&page=1&offset=10000&sort=asc&apikey=${PRIVATE_ETHERSCAN_API_KEY}`
         );
 
         const data = await response.json();
