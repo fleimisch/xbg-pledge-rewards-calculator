@@ -1,5 +1,6 @@
 <script lang="ts">
 	import RewardInput from '$lib/components/RewardInput.svelte';
+	// import RewardInputWallet from '$lib/components/RewardInputWallet.svelte';
 	import RewardStats from '$lib/components/RewardStats.svelte';
 	import RewardChart from '$lib/components/RewardChart.svelte';
 	import { writable } from 'svelte/store';
@@ -99,8 +100,12 @@
 		</h1>
 		<p class="text-gray-400 mb-8 mx-auto text-center">Boost Your Rewards with NFTs and Voting</p>
 
+		<!-- <div class="grid grid-cols-1 gap-6 mb-8">
+			<RewardInputWallet label="Your Wallet Address" />
+		</div> -->
+
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-			<RewardInput id="xbg-amount" label="XBG Amount You Pledged" bind:value={xbgAmount} min={0} />
+			<RewardInput id="xbg-amount" label="XBG Amount You Pledged." bind:value={xbgAmount} min={0} />
 			<RewardInput
 				id="prometheus-nfts"
 				label="Number of Prometheus You Own"

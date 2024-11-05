@@ -1,13 +1,8 @@
-// See https://svelte.dev/docs/kit/types#app
-// for information about these interfaces
-declare global {
-	namespace App {
-		// interface Error {}
-		// interface Locals {}
-		// interface PageData {}
-		// interface PageState {}
-		// interface Platform {}
-	}
-}
+/// <reference types="@sveltejs/kit" />
+/// <reference types="svelte" />
 
-export {};
+declare namespace svelteHTML {
+    interface HTMLAttributes<T> {
+        [key: string]: any;
+    }
+}
