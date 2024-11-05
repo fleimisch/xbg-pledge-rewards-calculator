@@ -7,10 +7,10 @@ const ETHERSCAN_API = 'https://api.etherscan.io/api';
 const CACHE_DURATION = 24 * 60 * 60; // 24 hours in seconds
 const REDIS_KEY = 'prometheus_nfts_data';
 
-// Initialize Upstash Redis
+// Initialize Upstash Redis with environment variables
 const redis = new Redis({
-    url: 'https://allowed-panther-26708.upstash.io',
-    token: 'AWhUAAIjcDE3N2Q4Y2UxMzVmNzQ0YTlmOTIzY2E5ZGY0ZjUyZGU1MnAxMA',
+    url: process.env.UPSTASH_REDIS_REST_URL || '',
+    token: process.env.UPSTASH_REDIS_REST_TOKEN || ''
 });
 
 // In-memory fallback cache
