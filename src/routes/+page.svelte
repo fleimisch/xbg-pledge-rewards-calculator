@@ -7,19 +7,27 @@
 	import { writable } from 'svelte/store';
 	import { onMount } from 'svelte';
 	import Modal from '$lib/components/Modal.svelte';
+	import Storage from '$lib/services/storage';
+
+	const storage = new Storage();
 
 	let boostModalOpen = false;
 
 	let REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
-	let totalStakedXBG = 94_000_000; // 50M XBG tokens staked by all users
-	let currentXBGPrice = 0.25;
-	let xbgAmount = 100000;
-	let prometheusCount = 1;
-	let chestplateCount = 1;
-	let partnerNFTBelow1000Count = 0;
-	let partnerNFTAbove1000Count = 0;
-	$: governanceVotes = true;
-	let seasonStreaks = 2;
+	let totalStakedXBG = 75_000_000; // 50M XBG tokens staked by all users
+	let currentXBGPrice = storage.getCookie('currentXBGPrice') ?? 0.25;
+	let xbgAmount = storage.getCookie('xbgAmount') ?? 100000;
+	let prometheusCount = storage.getCookie('prometheusCount') ?? 1;
+	let chestplateCount = storage.getCookie('chestplateCount') ?? 1;
+	let partnerNFTBelow1000Count = storage.getCookie('partnerNFTBelow1000Count') ?? 0;
+	let partnerNFTAbove1000Count = storage.getCookie('partnerNFTAbove1000Count') ?? 0;
+	let governanceVotes =
+		storage.getCookie('governanceVotes') !== undefined
+			? storage.getCookie('governanceVotes') === 'true'
+				? true
+				: false
+			: true;
+	let seasonStreaks = storage.getCookie('seasonStreaks') ?? 3;
 	$: accumulateRewards = true;
 
 	// NFT bonuses
@@ -31,7 +39,27 @@
 	$: if (partnerNFTAbove1000 > 0.5) partnerNFTAbove1000 = 0.5;
 	// Governance and streak bonuses
 	$: governanceBonus = governanceVotes ? 0.1 : 0; // 10% for voters
-	$: streakBonus = Math.min(seasonStreaks * 0.05, 1.0); // 5% per season, capped at 100%
+	$: streakBonus = Math.min(seasonStreaks * 0.05 - 0.05, 1.0); // 5% per season, capped at 100%
+	$: if (streakBonus < 0) streakBonus = 0;
+
+	$: {
+		storage.setCookie('xbgAmount', xbgAmount.toString(), 60 * 60 * 24 * 30);
+		storage.setCookie('currentXBGPrice', currentXBGPrice.toString(), 60 * 60 * 24 * 30);
+		storage.setCookie('prometheusCount', prometheusCount.toString(), 60 * 60 * 24 * 30);
+		storage.setCookie('chestplateCount', chestplateCount.toString(), 60 * 60 * 24 * 30);
+		storage.setCookie(
+			'partnerNFTBelow1000Count',
+			partnerNFTBelow1000Count.toString(),
+			60 * 60 * 24 * 30
+		);
+		storage.setCookie(
+			'partnerNFTAbove1000Count',
+			partnerNFTAbove1000Count.toString(),
+			60 * 60 * 24 * 30
+		);
+		storage.setCookie('seasonStreaks', seasonStreaks.toString(), 60 * 60 * 24 * 30);
+		storage.setCookie('governanceVotes', governanceVotes.toString(), 60 * 60 * 24 * 30);
+	}
 
 	// Calculate total multiplier (all bonuses are additive)
 	$: totalMultiplier =
