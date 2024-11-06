@@ -185,7 +185,7 @@
 			<ul class="list-disc ml-6 mt-2">
 				<li>Holders before Nov 11, 2024 receive 10 diamonds</li>
 				<li>New holders earn +1 diamond per month of holding</li>
-				<li>Maximum 10 diamonds per wallet</li>
+				<li>Maximum 10 diamonds per Prometheus NFT</li>
 				<li>Selling/moving Prometheus NFT resets diamonds</li>
 			</ul>
 		</div>
