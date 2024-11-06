@@ -3,7 +3,7 @@ import { Redis } from '@upstash/redis';
 import {PRIVATE_UPSTASH_REDIS_REST_URL, PRIVATE_UPSTASH_REDIS_REST_TOKEN, PRIVATE_ETHERSCAN_API_KEY} from '$env/static/private';
 const CONTRACT_ADDRESS = '0x5A3E7Fd48d9E88C22C391e0E4836C8e211DAeE66';
 const ETHERSCAN_API = 'https://api.etherscan.io/api';
-const CACHE_DURATION = 24 * 60 * 60; // 24 hours in seconds
+const CACHE_DURATION = 12 * 60 * 60; // 12 hours in seconds
 const REDIS_KEY = 'prometheus_nfts_data';
 
 // Initialize Upstash Redis with environment variables
