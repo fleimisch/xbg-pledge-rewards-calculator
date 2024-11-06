@@ -108,10 +108,11 @@
 		<h1 class="page-title md:text-6xl lg:text-7xl text-5xl font-bold mb-7 mx-auto">
 			<small>XBorg</small>Diamond Program
 		</h1>
-		<p class="text-gray-400 mb-8 mx-auto text-center">
+		<p class="text-gray-400 mb-4 mx-auto text-center">
 			Prometheus NFT Diamond Status
 			<a href="#diamond-rules" class="text-blue-400 hover:text-blue-300">(Diamond Program Rules)</a>
 		</p>
+		<p class="text-gray-700 mb-5 mx-auto text-center text-sm">* Data is refreshed every 12 hours</p>
 
 		<div class="multiplierSetting p-6 rounded-lg mb-8">
 			<div class="mb-4 flex gap-4 flex-col md:flex-row">
