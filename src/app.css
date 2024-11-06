@@ -9,4 +9,12 @@ body {
 	font-display: swap;
     background-color: #050505;
     overflow-x: hidden;
+    color: rgb(156 163 175);
 }
+
+h1 {font-size:1.5em; color:white; margin-bottom: 0.5em; font-weight: 800;}
+h2 {font-size:1.2em; color:white; margin-bottom: 0.5em; font-weight: 800;}
+h3 {font-size:1.1em; color:white; margin-bottom: 0.5em; font-weight: 800;}
+ul {list-style-type: disc; margin-left: 1em; margin-bottom: 0.5em;}
+li {margin-bottom: 0.5em;}
+section {margin-bottom: 1em;}

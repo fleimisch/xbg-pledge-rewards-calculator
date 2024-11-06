@@ -1,12 +1,13 @@
 <script lang="ts">
 	export let label: string = '';
+	export let sublabel: string = '';
 	export let value: number = 0;
 	export let min: number = 0;
 	export let max: number | undefined = undefined;
 	export let link: string | undefined = undefined;
 </script>
 
-<div class="multiplierSetting p-6 rounded-lg">
+<div class="multiplierSetting p-4 pb-6 rounded-lg relative">
 	<label class="block mb-2 text-sm">{label}</label>
 	{#if !$$slots.default}
 		<div class="flex">
@@ -22,6 +23,12 @@
 				<a href={link} target="_blank" class="button" title="See XBG Pledged Chart">Check</a>
 			{/if}
 		</div>
+		{#if sublabel}
+			<span
+				class="block mb-1 text-xs text-gray-400 absolute bottom-0 left-0 right-0 text-center w-full line-height-1"
+				>{sublabel}</span
+			>
+		{/if}
 	{:else}
 		<slot />
 	{/if}
