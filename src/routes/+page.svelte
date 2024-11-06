@@ -22,7 +22,7 @@
 	let partnerNFTBelow1000Count = storage.getCookie('partnerNFTBelow1000Count') ?? 0;
 	let partnerNFTAbove1000Count = storage.getCookie('partnerNFTAbove1000Count') ?? 0;
 	let governanceVotes =
-		storage.getCookie('governanceVotes') !== undefined
+		storage.getCookie('governanceVotes') !== null
 			? storage.getCookie('governanceVotes') === 'true'
 				? true
 				: false
