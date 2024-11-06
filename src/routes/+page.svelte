@@ -306,19 +306,32 @@
 	</section>
 
 	<section>
-		<h2>Partner NFTs &gt; $1,000 FP</h2>
+		<h2>Partner NFTs</h2>
 		<ul>
-			<li>10% boost per NFT</li>
-			<li>Boosts cap at 50%</li>
+			<li><span class="text-white">&gt;$1,000 FP</span>: 10% boost per NFT (cap at 50%)</li>
+			<li><span class="text-white">&lt;$1,000 FP</span>: 5% boost per NFT (cap at 20%)</li>
 		</ul>
 	</section>
 
-	<section>
-		<h2>Partner NFTs &lt; $1,000 FP</h2>
-		<ul>
-			<li>5% boost per NFT</li>
-			<li>Boosts cap at 20%</li>
-		</ul>
+	<section class="flex flex-wrap gap-2 text-sm text-gray-400">
+		<a href="https://x.com/OverworldPlay" class="underline" target="_blank">@OverworldPlay</a>
+		<a href="https://x.com/GAM3Sgg_" class="underline" target="_blank">@GAM3Sgg_</a>
+		<a href="https://x.com/Overlord_xyz" class="underline" target="_blank">@Overlord_xyz</a>
+		<a href="https://x.com/aiarena_" class="underline" target="_blank">@aiarena_</a>
+		<a href="https://x.com/LizLabsio" class="underline" target="_blank">@LizLabsio</a>
+		<a href="https://x.com/L3E7_Official" class="underline" target="_blank">@L3E7_Official</a>
+		<a href="https://x.com/todaythegame" class="underline" target="_blank">@todaythegame</a>
+		<a href="https://x.com/NeoTokyoCode" class="underline" target="_blank">@NeoTokyoCode</a>
+		<a href="https://x.com/Revolving_Games" class="underline" target="_blank">@Revolving_Games</a>
+		<a href="https://x.com/JirasanOfficial" class="underline" target="_blank">@JirasanOfficial</a>
+		<a href="https://x.com/Azuki" class="underline" target="_blank">@Azuki</a>
+		<a href="https://x.com/pudgypenguins" class="underline" target="_blank">@pudgypenguins</a>
+		<a href="https://x.com/PirateNation" class="underline" target="_blank">@PirateNation</a>
+
+		<div class="block w-full text-left mt-2 flex-break text-blue-500">
+			<a href="https://x.com/XBorgHQ" class="" target="_blank">Check on X for latest partner NFTs</a
+			>
+		</div>
 	</section>
 
 	<section>
@@ -331,8 +344,7 @@
 	<section>
 		<h2>Season Streaks</h2>
 		<ul>
-			<li>5% per consecutive season</li>
-			<li>Capped at 100%</li>
+			<li>5% per consecutive season (capped at 100%)</li>
 		</ul>
 	</section>
 

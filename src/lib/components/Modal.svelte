@@ -14,9 +14,11 @@
 
 {#if isMounted && open}
 	<div
-		class="fixed flex items-center justify-center flex-col h-screen w-full overflow-y-auto top-0 left-0 right-0 bottom-0 bg-black/80"
+		class="fixed flex items-center justify-start md:justify-center flex-col h-screen w-full overflow-y-auto top-0 left-0 right-0 bottom-0 bg-black/80"
 	>
-		<div class="modal-inner flex flex-col justify-between items-center p-10 rounded-lg">
+		<div
+			class="modal-inner flex flex-col justify-between items-center p-10 rounded-lg md:max-w-screen-md mx-auto"
+		>
 			<div>
 				{@render children()}
 			</div>
