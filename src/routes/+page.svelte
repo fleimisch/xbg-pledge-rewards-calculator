@@ -30,6 +30,8 @@
 	let seasonStreaks = storage.getCookie('seasonStreaks') ?? 3;
 	$: accumulateRewards = true;
 
+	let myBlueReward = false;
+
 	// NFT bonuses
 	$: prometheusBonus = prometheusCount * 0.2; // 20% per Prometheus
 	$: chestplateBonus = chestplateCount * 0.025; // 2.5% per Chestplate
@@ -41,6 +43,8 @@
 	$: governanceBonus = governanceVotes ? 0.1 : 0; // 10% for voters
 	$: streakBonus = Math.min(seasonStreaks * 0.05 - 0.05, 1.0); // 5% per season, capped at 100%
 	$: if (streakBonus < 0) streakBonus = 0;
+
+	$: myBlueRewardBonus = myBlueReward ? 0.25 : 0; // 25% for myBlueReward
 
 	$: {
 		storage.setCookie('xbgAmount', xbgAmount.toString(), 60 * 60 * 24 * 30);
@@ -69,8 +73,8 @@
 		governanceBonus +
 		streakBonus +
 		partnerNFTBelow1000 +
-		partnerNFTAbove1000;
-
+		partnerNFTAbove1000 +
+		myBlueRewardBonus;
 	// Calculate total staked amount including multiplier
 	$: effectiveStakedAmount = xbgAmount * totalMultiplier;
 
@@ -222,8 +226,8 @@
 				min={0}
 			/> -->
 
-			<RewardInput label="Additional Multipliers">
-				<label for="governanceVotes" class="flex items-center" style="margin-top: -0.5em;">
+			<RewardInput className="flex flex-col gap-1 justify-center select-none">
+				<label for="governanceVotes" class="flex items-center">
 					<input
 						type="checkbox"
 						id="governanceVotes"
@@ -232,7 +236,16 @@
 					/>
 					<span class="ml-2 text-gray-400">Governance Voter</span>
 				</label>
-				<label for="accumulate-rewards" class="flex items-center mt-1">
+				<label for="myblueReward" class="flex items-center">
+					<input
+						type="checkbox"
+						id="myblueReward"
+						bind:checked={myBlueReward}
+						class="form-checkbox h-5 w-5 text-blue-600"
+					/>
+					<span class="ml-2 text-gray-400">MyBlue Bonus</span>
+				</label>
+				<label for="accumulate-rewards" class="flex items-center">
 					<input
 						type="checkbox"
 						id="accumulate-rewards"
@@ -255,7 +268,7 @@
 				<RewardStats label="Governance Bonus" value={governanceBonus * 100} />
 				<RewardStats label="Streak Bonus" value={streakBonus * 100} />
 				<RewardStats label="Seasonal Rewards Pool" value="{REWARDS_POOL_LIMIT} XBG" suffix="" />
-				<RewardStats label="Pool Utilization" value={poolUtilization} />
+				<RewardStats label="Additional Multipliers" value={myBlueRewardBonus * 100} />
 				<RewardStats label="Total Multiplier" value={totalMultiplier} suffix="" />
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-1 gap-4 border-t border-gray-600 pt-4">
@@ -274,28 +287,37 @@
 				<div>
 					<p class="text-sm text-gray-400">Seasonal Rewards (Monthly):</p>
 					<p class="text-2xl text-yellow-400">
-						{Math.round(adjustedMonthlyReward)} XBG (~${Math.round(
-							currentXBGPrice * Number(adjustedMonthlyReward.toFixed(2))
-						).toFixed(2)})
+						{Math.round(adjustedMonthlyReward)} XBG
+						<span class="text-lg"
+							>(~${Math.round(currentXBGPrice * Number(adjustedMonthlyReward.toFixed(2))).toFixed(
+								2
+							)})</span
+						>
 					</p>
 				</div>
 				<div>
 					<p class="text-sm text-gray-400">Annual Rewards:</p>
 					<p class="text-2xl text-yellow-400">
-						{Math.round(monthlyRewards[monthlyRewards.length - 1].cumulative)} XBG (~${Math.round(
-							currentXBGPrice *
-								Number(monthlyRewards[monthlyRewards.length - 1].cumulative.toFixed(2))
-						).toFixed(2)})
+						{Math.round(monthlyRewards[monthlyRewards.length - 1].cumulative)} XBG
+						<span class="text-lg"
+							>(~${Math.round(
+								currentXBGPrice *
+									Number(monthlyRewards[monthlyRewards.length - 1].cumulative.toFixed(2))
+							).toFixed(2)})</span
+						>
 					</p>
 				</div>
 			</div>
-			<p class="text-sm text-gray-400 mt-2">
+			<p class="text-sm text-gray-300 mt-2 font-bold">
 				Effective APY: {effectiveAPY.toFixed(2)}%
-				{#if (xbgAmount * totalMultiplier) / 12 > adjustedMonthlyReward}
+				<!-- {#if (xbgAmount * totalMultiplier) / 12 > adjustedMonthlyReward}
 					<span class="text-orange-400 ml-2">(Limited by rewards pool)</span>
-				{/if}
+				{/if} -->
+				<!-- <RewardStats label="Pool Utilization" value={poolUtilization} /> -->
 			</p>
-			<p class="text-xs text-gray-500 mt-1">Pool Share: {(poolShare * 100).toFixed(4)}%</p>
+			<p class="text-xs text-gray-300 mt-1">
+				Pool Share: {(poolShare * 100).toFixed(4)}% | Pool Utilization: {poolUtilization}%
+			</p>
 		</div>
 
 		{#key monthlyRewards}

@@ -5,10 +5,13 @@
 	export let min: number = 0;
 	export let max: number | undefined = undefined;
 	export let link: string | undefined = undefined;
+	export let className: string = '';
 </script>
 
-<div class="multiplierSetting p-4 pb-6 rounded-lg relative">
-	<label class="block mb-2 text-sm">{label}</label>
+<div class="multiplierSetting p-4 pb-6 rounded-lg relative {className}">
+	{#if label}
+		<label class="block mb-2 text-sm">{label}</label>
+	{/if}
 	{#if !$$slots.default}
 		<div class="flex">
 			<input
