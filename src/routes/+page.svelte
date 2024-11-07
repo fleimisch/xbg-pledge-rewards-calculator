@@ -30,7 +30,7 @@
 	let seasonStreaks = storage.getCookie('seasonStreaks') ?? 3;
 	$: accumulateRewards = true;
 
-	let myBlueReward = false;
+	let myBlueReward = storage.getCookie('myBlueReward') ?? false;
 
 	// NFT bonuses
 	$: prometheusBonus = prometheusCount * 0.2; // 20% per Prometheus
@@ -63,6 +63,7 @@
 		);
 		storage.setCookie('seasonStreaks', seasonStreaks.toString(), 60 * 60 * 24 * 30);
 		storage.setCookie('governanceVotes', governanceVotes.toString(), 60 * 60 * 24 * 30);
+		storage.setCookie('myBlueReward', myBlueReward.toString(), 60 * 60 * 24 * 30);
 	}
 
 	// Calculate total multiplier (all bonuses are additive)
