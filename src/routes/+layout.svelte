@@ -9,8 +9,8 @@
 
 	onMount(async (): Promise<any> => {
 		const cleanup = device.init();
-		inject();
 		isMounted = true;
+		inject();
 		return cleanup;
 	});
 </script>

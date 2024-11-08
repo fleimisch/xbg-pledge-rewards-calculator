@@ -14,7 +14,7 @@
 	let boostModalOpen = false;
 
 	let REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
-	let totalStakedXBG = 75_000_000; // 50M XBG tokens staked by all users
+	let totalStakedXBG = 75_364_000; // 50M XBG tokens staked by all users
 	let currentXBGPrice = storage.getCookie('currentXBGPrice') ?? 0.25;
 	let xbgAmount = storage.getCookie('xbgAmount') ?? 100000;
 	let prometheusCount = storage.getCookie('prometheusCount') ?? 1;
@@ -80,7 +80,7 @@
 	$: effectiveStakedAmount = xbgAmount * totalMultiplier;
 
 	// Calculate rewards with pool limit consideration
-	$: poolShare = effectiveStakedAmount / totalStakedXBG;
+	$: poolShare = effectiveStakedAmount / REWARDS_POOL_LIMIT;
 	$: adjustedMonthlyReward = Math.min(
 		effectiveStakedAmount,
 		REWARDS_POOL_LIMIT * poolShare
@@ -317,7 +317,7 @@
 				<!-- <RewardStats label="Pool Utilization" value={poolUtilization} /> -->
 			</p>
 			<p class="text-xs text-gray-300 mt-1">
-				Pool Share: {(poolShare * 100).toFixed(4)}% | Pool Utilization: {poolUtilization}%
+				Pool Share: {poolShare.toFixed(4)}% | Pool Utilization: {poolUtilization}%
 			</p>
 		</div>
 
