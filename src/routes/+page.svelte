@@ -80,21 +80,16 @@
 	$: effectiveStakedAmount = xbgAmount * totalMultiplier;
 
 	// Calculate rewards with pool limit consideration
-	$: poolShare = effectiveStakedAmount / totalStakedXBG;
-	$: adjustedMonthlyReward = Math.min(
-		effectiveStakedAmount,
-		REWARDS_POOL_LIMIT * poolShare
-	) as number;
+	$: poolShare = effectiveStakedAmount / REWARDS_POOL_LIMIT / 100;
+	$: adjustedMonthlyReward = REWARDS_POOL_LIMIT * poolShare;
+	// $: console.log(poolShare, effectiveStakedAmount, REWARDS_POOL_LIMIT);
 
 	$: monthlyRewards = Array.from({ length: 12 }, (_, i) => {
 		if (accumulateRewards) {
 			let cumulativeStaked = effectiveStakedAmount;
 			let cumulativeReward = 0;
 			for (let j = 0; j <= i; j++) {
-				let monthlyReward = Math.min(
-					cumulativeStaked,
-					REWARDS_POOL_LIMIT * (cumulativeStaked / totalStakedXBG)
-				);
+				let monthlyReward = REWARDS_POOL_LIMIT * (cumulativeStaked / REWARDS_POOL_LIMIT / 100);
 				cumulativeReward += monthlyReward;
 				cumulativeStaked += monthlyReward;
 			}
