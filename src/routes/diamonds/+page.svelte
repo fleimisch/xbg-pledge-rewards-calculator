@@ -2,8 +2,115 @@
 	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
 	import { device } from '$lib/stores/device';
+	import SvgIcon from '$lib/components/elements/SvgIcon.svelte';
+	import ActivityLoader from '$lib/loaders/ActivityLoader.svelte';
 
-	export let data: PageData;
+	class DiamondProgram {
+		static readonly MAX_DIAMONDS = 10;
+		static readonly CUTOFF_DATE = '2024-11-11';
+
+		searchTerm = $state('');
+		error = $state('');
+		isMounted = $state(false);
+		nfts = $state<NFTInfo[]>([]);
+
+		initialize = async () => {
+			const response = await fetch('/api/diamonds');
+			const data = await response.json();
+
+			if (data.nfts) {
+				this.nfts = data.nfts.map((nft: any) => ({
+					...nft,
+					diamonds: this.calculateDiamonds(nft.acquisitionTimestamp, nft.currentHolder)
+				}));
+			}
+			if (data.error) {
+				this.error = data.error;
+			}
+			this.isMounted = true;
+		};
+
+		calculateDiamonds(acquisitionTimestamp: number, address: string): number {
+			const currentTime = Date.now();
+			const normalizedTimestamp = acquisitionTimestamp * 1000;
+			const cutoffTimestamp = new Date(DiamondProgram.CUTOFF_DATE).getTime();
+
+			if (normalizedTimestamp > cutoffTimestamp) {
+				const holdingPeriodInDays = Math.floor(
+					(currentTime - normalizedTimestamp) / (24 * 60 * 60 * 1000)
+				);
+				const diamonds = Math.floor(holdingPeriodInDays / 30);
+				return Math.min(diamonds + 1, DiamondProgram.MAX_DIAMONDS);
+			}
+			return DiamondProgram.MAX_DIAMONDS;
+		}
+
+		formatDate(timestamp: number): string {
+			return new Date(timestamp * 1000).toLocaleDateString();
+		}
+
+		getDiamondEmojis(count: number): string {
+			return '💎' + count;
+		}
+
+		handleSortByDiamonds = () => {
+			const isCurrentlyDescending =
+				this.nfts.length > 1 &&
+				((this.nfts[0].diamonds ?? 0) > (this.nfts[this.nfts.length - 1].diamonds ?? 0) ||
+					this.nfts[0].diamonds === 10);
+
+			this.nfts = [...this.nfts].sort((a, b) => {
+				const diamondsA = a.diamonds ?? 0;
+				const diamondsB = b.diamonds ?? 0;
+				return isCurrentlyDescending ? diamondsA - diamondsB : diamondsB - diamondsA;
+			});
+		};
+
+		handleSortByDate = () => {
+			const isCurrentlyDescending =
+				this.nfts.length > 1 &&
+				(this.nfts[0].acquisitionTimestamp ?? 0) >
+					(this.nfts[this.nfts.length - 1].acquisitionTimestamp ?? 0);
+
+			this.nfts = [...this.nfts].sort((a, b) =>
+				isCurrentlyDescending
+					? a.acquisitionTimestamp - b.acquisitionTimestamp
+					: b.acquisitionTimestamp - a.acquisitionTimestamp
+			);
+		};
+
+		handleExportCSV = () => {
+			// Prepare headers for CSV
+			const headers = ['Token ID', 'Current Holder', 'Acquisition Date', 'Diamonds'];
+
+			// Map NFT data to CSV rows
+			const rows = this.nfts.map((nft) => [
+				nft.tokenId,
+				nft.currentHolder,
+				this.formatDate(nft.acquisitionTimestamp),
+				nft.diamonds ?? 0
+			]);
+
+			// Combine headers and rows
+			const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+
+			// Create and trigger download
+			const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+			const link = document.createElement('a');
+			const url = URL.createObjectURL(blob);
+
+			link.setAttribute('href', url);
+			link.setAttribute('download', 'prometheus_diamonds.csv');
+			link.style.visibility = 'hidden';
+
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		};
+	}
+
+	const program = new DiamondProgram();
+	onMount(program.initialize);
 
 	interface NFTInfo {
 		tokenId: number;
@@ -12,74 +119,17 @@
 		diamonds?: number;
 	}
 
-	let nfts: NFTInfo[] = [];
-	let searchTerm = '';
-	let cutoffDate = '2024-11-11';
+	// Derived state for filtered NFTs
+	const filteredNFTs = $derived.by(() => {
+		if (!program.searchTerm) return program.nfts;
 
-	const MAX_DIAMONDS = 10;
-
-	// Instead, create a function to get the cutoff timestamp
-	function getCutoffTimestamp(): number {
-		return new Date(cutoffDate).getTime();
-	}
-
-	function calculateDiamonds(acquisitionTimestamp: number, address: string): number {
-		const currentTime = Date.now();
-		acquisitionTimestamp = acquisitionTimestamp * 1000;
-		const cutoffTimestamp = getCutoffTimestamp();
-
-		if (acquisitionTimestamp > cutoffTimestamp) {
-			const holdingPeriodInMilliseconds = currentTime - acquisitionTimestamp;
-			const formattedCurrentTime = new Date(currentTime);
-			const formattedAcquisitionTime = new Date(acquisitionTimestamp);
-			const holdingPeriodInDays = Math.floor(
-				(formattedCurrentTime.getTime() - formattedAcquisitionTime.getTime()) /
-					(24 * 60 * 60 * 1000)
-			);
-			console.log(formattedCurrentTime, formattedAcquisitionTime, holdingPeriodInDays);
-			const diamonds = Math.floor(holdingPeriodInDays / 30);
-			return Math.min(diamonds + 1, MAX_DIAMONDS);
-		} else {
-			return MAX_DIAMONDS;
-		}
-	}
-
-	// Load and calculate diamonds once on mount
-	onMount(() => {
-		if (data.nfts) {
-			nfts = data.nfts.map((nft: any) => ({
-				...nft,
-				diamonds: calculateDiamonds(nft.acquisitionTimestamp, nft.currentHolder)
-			}));
-		}
+		return program.nfts.filter((nft) => {
+			if (/^\d{1,4}$/.test(program.searchTerm)) {
+				return nft.tokenId.toString() === program.searchTerm;
+			}
+			return nft.currentHolder.toLowerCase().includes(program.searchTerm.toLowerCase());
+		});
 	});
-
-	$: filteredNFTs = searchTerm
-		? nfts.filter((nft) => {
-				// If search term is a number and up to 4 digits, search by token ID
-				if (/^\d{1,4}$/.test(searchTerm)) {
-					return nft.tokenId.toString() === searchTerm;
-				}
-				// Otherwise, search by holder address
-				return nft.currentHolder.toLowerCase().includes(searchTerm.toLowerCase());
-			})
-		: nfts;
-
-	function formatDate(timestamp: number): string {
-		return new Date(timestamp * 1000).toLocaleDateString();
-	}
-
-	function getDiamondEmojis(count: number): string {
-		return '💎' + count;
-	}
-
-	// This reactive statement recalculates diamonds whenever cutoffDate changes
-	$: if (cutoffDate && nfts.length > 0) {
-		nfts = nfts.map((nft) => ({
-			...nft,
-			diamonds: calculateDiamonds(nft.acquisitionTimestamp, nft.currentHolder)
-		}));
-	}
 </script>
 
 <div id="frame" class="min-h-screen text-white p-8 relative" style="overflow-x: hidden;">
@@ -115,36 +165,45 @@
 		<p class="text-gray-700 mb-5 mx-auto text-center text-sm">* Data is refreshed every 12 hours</p>
 
 		<div class="multiplierSetting p-6 rounded-lg mb-8">
-			<div class="mb-4 flex gap-4 flex-col md:flex-row">
+			<div class="mb-4 flex justify-between items-center gap-4">
 				<input
 					type="text"
 					placeholder="Search by wallet address or token ID..."
-					class="flex-1 p-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-					bind:value={searchTerm}
+					class="w-full p-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
+					bind:value={program.searchTerm}
 				/>
-				<div class="flex items-center gap-2">
-					<label class="text-sm text-gray-400">Cutoff Test:</label>
-					<input
-						type="date"
-						bind:value={cutoffDate}
-						class="p-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-					/>
-				</div>
+				<button onclick={program.handleExportCSV}>Export</button>
 			</div>
 
-			{#if nfts.length === 0}
+			{#if !program.isMounted}
+				<ActivityLoader />
+			{:else if program.nfts.length === 0}
 				<div class="text-center text-gray-400 py-8">Loading Prometheus data...</div>
-			{:else if data.error}
-				<div class="text-center text-red-400 py-8">{data.error}</div>
+			{:else if program.error}
+				<div class="text-center text-red-400 py-8">{program.error}</div>
 			{:else}
 				<div class="overflow-x-auto">
 					<table class="w-full" style={$device.isMobile ? 'zoom:0.8' : ''}>
 						<thead>
-							<tr class="text-left text-gray-400">
+							<tr class="text-left text-gray-400 select-none">
 								<th class="p-2 whitespace-nowrap">Token ID</th>
 								<th class="p-2 whitespace-nowrap">Current Holder</th>
-								<th class="p-2 text-center whitespace-nowrap">Acquired</th>
-								<th class="p-2 text-center whitespace-nowrap">Diamonds</th>
+								<th
+									class="p-2 text-center whitespace-nowrap cursor-pointer"
+									onclick={program.handleSortByDate}
+								>
+									<span class="flex justify-center items-center gap-1"
+										>Acquired<SvgIcon icon="sort-down" size={16} /></span
+									>
+								</th>
+								<th
+									class="p-2 text-center whitespace-nowrap cursor-pointer"
+									onclick={program.handleSortByDiamonds}
+								>
+									<span class="flex justify-center items-center gap-1"
+										>Diamonds <SvgIcon icon="sort-down" size={16} /></span
+									>
+								</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -162,11 +221,11 @@
 										</a>
 									</td>
 									<td class="p-2 text-center whitespace-nowrap">
-										{formatDate(nft.acquisitionTimestamp)}
+										{program.formatDate(nft.acquisitionTimestamp)}
 									</td>
 									<td class="p-2 text-center whitespace-nowrap">
 										<div class="flex items-center gap-1 justify-center">
-											{getDiamondEmojis(nft.diamonds ?? 0)}
+											{program.getDiamondEmojis(nft.diamonds ?? 0)}
 										</div>
 									</td>
 								</tr>
@@ -176,7 +235,7 @@
 				</div>
 
 				<div class="mt-4 text-sm text-gray-400">
-					Total NFTs: {nfts.length}
+					Total NFTs: {program.nfts.length}
 				</div>
 			{/if}
 		</div>

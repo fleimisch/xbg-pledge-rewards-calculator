@@ -1,0 +1,56 @@
+﻿<svg viewBox="0 0 87 87" version="1.1"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink">
+
+    <style>
+        .ui-warning-circle {
+            stroke-dasharray: 260.75219024795285px, 260.75219024795285px;
+            stroke-dashoffset: 260.75219024795285px;
+            transform: rotate(220deg);
+            transform-origin: center center;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            animation: ani-success-circle 1s ease-in both;
+        }
+        .ui-warning-path {
+            stroke-dasharray: 60px, 64px;
+            stroke-dashoffset: 62px;
+            stroke-linecap: round;
+            animation: ani-success-path 0.4s 1s ease-in both;
+        }
+        .ui-dot-path{
+            animation: ani-dot-path 0.5s 1s ease-in both;
+            visibility: hidden;
+        }
+        @keyframes ani-success-circle {
+            to {
+                stroke-dashoffset: 782.2565707438586px;
+            }
+        }
+        @keyframes ani-success-path {
+            0% {
+                stroke-dashoffset: 62px;
+            }
+            65% {
+                stroke-dashoffset: -5px;
+            }
+            84% {
+                stroke-dashoffset: 4px;
+            }
+            100% {
+                stroke-dashoffset: -2px;
+            }
+        }
+        @keyframes ani-dot-path {
+            to { visibility: visible; }
+        }
+    </style>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-3" transform="translate(2.000000, 2.000000)">
+            <circle stroke="#F8DE7E" stroke-width="4" cx="41.5" cy="41.5" r="41.5"></circle>
+            <circle class="ui-warning-circle" stroke="#FFBF00" stroke-width="4" cx="46" cy="43.5" r="41.5"></circle>
+            <polyline class="ui-warning-path" id="Path-2" stroke="#FFBF00" stroke-width="4" points="40 25,40 50"/>
+            <circle class="ui-dot-path" stroke="#FFBF00" fill="red" stroke-width="3" cx="40" cy="58" r="1"></circle>
+        </g>
+    </g>
+</svg>

@@ -14,13 +14,13 @@
 	},
 	"include": [
 		".svelte-kit/types/**/$types.d.ts",
-		".svelte-kit/types/src/**/$types.d.ts",
 		"vite.config.ts",
 		"src/**/*.js",
 		"src/**/*.ts",
 		"src/**/*.svelte",
 		"tests/**/*.js",
 		"tests/**/*.ts",
-		"tests/**/*.svelte"
+		"src/icons-viewer/**/*.ts",
+		"src/icons-viewer/**/*.svelte"
 	]
 }

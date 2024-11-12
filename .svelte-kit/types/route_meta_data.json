@@ -2,11 +2,20 @@
 	"/": [
 		"src/routes/+page.ts"
 	],
+	"/api/diamonds": [
+		"src/routes/api/diamonds/+server.ts"
+	],
 	"/api/prometheus": [
 		"src/routes/api/prometheus/+server.ts"
 	],
 	"/charts": [],
 	"/diamonds": [
 		"src/routes/diamonds/+page.server.ts"
+	],
+	"/iconsviewer": [
+		"src/routes/iconsviewer/+page.server.ts"
+	],
+	"/icons/[...file]": [
+		"src/routes/icons/[...file]/+server.ts"
 	]
 }

@@ -65,50 +65,50 @@ async function setCachedData(data: any) {
 }
 
 export const load: PageServerLoad = async () => {
-    try {
-        // Try to get cached data
-        const cachedData = await getCachedData();
-        if (cachedData) {
-            console.log('Serving from cache');
-            return { nfts: cachedData };
-        }
+    // try {
+    //     // Try to get cached data
+    //     const cachedData = await getCachedData();
+    //     if (cachedData) {
+    //         console.log('Serving from cache');
+    //         return { nfts: cachedData };
+    //     }
 
-        // If no cache, fetch new data
-        console.log('Fetching fresh data');
-        const response = await fetch(
-            `${ETHERSCAN_API}?module=account&action=tokennfttx&contractaddress=${CONTRACT_ADDRESS}&page=1&offset=10000&sort=asc&apikey=${PRIVATE_ETHERSCAN_API_KEY}`
-        );
+    //     // If no cache, fetch new data
+    //     console.log('Fetching fresh data');
+    //     const response = await fetch(
+    //         `${ETHERSCAN_API}?module=account&action=tokennfttx&contractaddress=${CONTRACT_ADDRESS}&page=1&offset=10000&sort=asc&apikey=${PRIVATE_ETHERSCAN_API_KEY}`
+    //     );
 
-        const data = await response.json();
+    //     const data = await response.json();
         
-        if (data.status !== '1') {
-            throw new Error(`Etherscan API error: ${data.message}`);
-        }
+    //     if (data.status !== '1') {
+    //         throw new Error(`Etherscan API error: ${data.message}`);
+    //     }
 
-        // Process transfers to get current owners and timestamps
-        const nftMap = new Map();
+    //     // Process transfers to get current owners and timestamps
+    //     const nftMap = new Map();
         
-        data.result.forEach((tx: any) => {
-            const tokenId = parseInt(tx.tokenID);
-            nftMap.set(tokenId, {
-                tokenId,
-                currentHolder: tx.to,
-                acquisitionTimestamp: parseInt(tx.timeStamp)
-            });
-        });
+    //     data.result.forEach((tx: any) => {
+    //         const tokenId = parseInt(tx.tokenID);
+    //         nftMap.set(tokenId, {
+    //             tokenId,
+    //             currentHolder: tx.to,
+    //             acquisitionTimestamp: parseInt(tx.timeStamp)
+    //         });
+    //     });
 
-        // Convert map to array and sort
-        const nfts = Array.from(nftMap.values())
-            .sort((a, b) => a.tokenId - b.tokenId);
+    //     // Convert map to array and sort
+    //     const nfts = Array.from(nftMap.values())
+    //         .sort((a, b) => a.tokenId - b.tokenId);
 
-        // Cache the new data
-        await setCachedData(nfts);
+    //     // Cache the new data
+    //     await setCachedData(nfts);
 
-        return { nfts };
-    } catch (error) {
-        console.error("Error fetching Prometheus data:", error);
-        return {
-            error: 'Failed to fetch NFT data'
-        };
-    }
+    //     return { nfts };
+    // } catch (error) {
+    //     console.error("Error fetching Prometheus data:", error);
+    //     return {
+    //         error: 'Failed to fetch NFT data'
+    //     };
+    // }
 }; 
