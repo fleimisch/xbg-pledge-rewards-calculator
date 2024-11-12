@@ -42,8 +42,7 @@
 		"@vercel/analytics": "^1.1.1",
 		"chart.js": "^4.4.6",
 		"localforage": "^1.10.0",
-		"vite-plugin-svg-icons": "^2.0.1",
-		"@types/node": "^latest"
+		"vite-plugin-svg-icons": "^2.0.1"
 	},
 	"overrides": {
 		"@sveltejs/vite-plugin-svelte": "^4.0.0-next.6"
