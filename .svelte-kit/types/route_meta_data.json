@@ -17,5 +17,8 @@
 	],
 	"/icons/[...file]": [
 		"src/routes/icons/[...file]/+server.ts"
+	],
+	"/rewards": [
+		"src/routes/rewards/+page.ts"
 	]
 }
