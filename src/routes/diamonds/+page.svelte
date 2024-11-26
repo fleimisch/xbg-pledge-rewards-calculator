@@ -35,14 +35,33 @@
 			const normalizedTimestamp = acquisitionTimestamp * 1000;
 			const cutoffTimestamp = new Date(DiamondProgram.CUTOFF_DATE).getTime();
 
-			if (normalizedTimestamp > cutoffTimestamp) {
-				const holdingPeriodInDays = Math.floor(
-					(currentTime - normalizedTimestamp) / (24 * 60 * 60 * 1000)
-				);
-				const diamonds = Math.floor(holdingPeriodInDays / 30);
-				return Math.min(diamonds + 1, DiamondProgram.MAX_DIAMONDS);
+			console.log('Current time:', new Date(currentTime).toISOString());
+			console.log('Acquisition time:', new Date(normalizedTimestamp).toISOString());
+			console.log('Cutoff time:', new Date(cutoffTimestamp).toISOString());
+
+			// If acquired before cutoff date, return max diamonds
+			if (normalizedTimestamp < cutoffTimestamp) {
+				return DiamondProgram.MAX_DIAMONDS;
 			}
-			return DiamondProgram.MAX_DIAMONDS;
+
+			// If acquired on cutoff date exactly, return max diamonds
+			if (
+				new Date(normalizedTimestamp).toDateString() === new Date(cutoffTimestamp).toDateString()
+			) {
+				return DiamondProgram.MAX_DIAMONDS;
+			}
+
+			// If acquired after cutoff date, calculate based on holding period
+			const holdingPeriodInDays = Math.floor(
+				(currentTime - normalizedTimestamp) / (24 * 60 * 60 * 1000)
+			);
+
+			if (holdingPeriodInDays < 30) {
+				return 0;
+			}
+
+			const diamonds = Math.floor(holdingPeriodInDays / 30);
+			return Math.min(diamonds, DiamondProgram.MAX_DIAMONDS);
 		}
 
 		formatDate(timestamp: number): string {
