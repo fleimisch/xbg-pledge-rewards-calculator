@@ -113,11 +113,11 @@
 		private clearIrrelevantCookies() {
 			this.storage.deleteCookie('partnerNFTBelow1000Count');
 			this.storage.deleteCookie('partnerNFTAbove1000Count');
-			if (+this.storage.getCookie('seasonStreaks') === this.seasonNumber - 1) {
-				this.storage.deleteCookie('seasonStreaks');
-				this.seasonStreaks = this.seasonNumber;
-				this.storage.setCookie('seasonStreaks', this.seasonStreaks.toString(), this.cookieExpiry);
-			}
+			// if (+this.storage.getCookie('seasonStreaks') === this.seasonNumber - 1) {
+			// 	this.storage.deleteCookie('seasonStreaks');
+			// 	this.seasonStreaks = this.seasonNumber;
+			// 	this.storage.setCookie('seasonStreaks', this.seasonStreaks.toString(), this.cookieExpiry);
+			// }
 		}
 	}
 
