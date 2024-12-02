@@ -1,122 +1,128 @@
 <script lang="ts">
 	import Xborg from '$lib/components/elements/Xborg.svelte';
 	import RewardInput from '$lib/components/RewardInput.svelte';
-	// import RewardInputWallet from '$lib/components/RewardInputWallet.svelte';
 	import RewardStats from '$lib/components/RewardStats.svelte';
 	import RewardChart from '$lib/components/RewardChart.svelte';
-	import { writable } from 'svelte/store';
 	import { onMount } from 'svelte';
 	import Modal from '$lib/components/Modal.svelte';
 	import Storage from '$lib/services/storage';
 
-	const storage = new Storage();
+	class RewardsCalculator {
+		static readonly REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
+		static readonly DEFAULT_TOTAL_STAKED = 75_000_000; // 50M XBG tokens staked
 
-	let boostModalOpen = false;
+		seasonNumber = 4;
 
-	let REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
-	let totalStakedXBG = 75_000_000; // 50M XBG tokens staked by all users
-	let currentXBGPrice = storage.getCookie('currentXBGPrice') ?? 0.25;
-	let xbgAmount = storage.getCookie('xbgAmount') ?? 100000;
-	let prometheusCount = storage.getCookie('prometheusCount') ?? 1;
-	let chestplateCount = storage.getCookie('chestplateCount') ?? 1;
-	let partnerNFTBelow1000Count = storage.getCookie('partnerNFTBelow1000Count') ?? 0;
-	let partnerNFTAbove1000Count = storage.getCookie('partnerNFTAbove1000Count') ?? 0;
-	let governanceVotes =
-		storage.getCookie('governanceVotes') !== null
-			? storage.getCookie('governanceVotes') === 'true'
-				? true
-				: false
-			: true;
-	let seasonStreaks = storage.getCookie('seasonStreaks') ?? 3;
-	$: accumulateRewards = true;
+		storage = new Storage();
+		boostModalOpen = $state(false);
+		cookieExpiry = 60 * 60 * 24 * 28; // 28 days
 
-	let myBlueReward = storage.getCookie('myBlueReward') ?? false;
-
-	// NFT bonuses
-	$: prometheusBonus = prometheusCount * 0.2; // 20% per Prometheus
-	$: chestplateBonus = chestplateCount * 0.025; // 2.5% per Chestplate
-	$: partnerNFTBelow1000 = partnerNFTBelow1000Count * 0.05; // 5% per Chestplate cappted at 20%
-	$: if (partnerNFTBelow1000 > 0.2) partnerNFTBelow1000 = 0.2;
-	$: partnerNFTAbove1000 = partnerNFTAbove1000Count * 0.1; // 10% per Chestplate cappted at 50%
-	$: if (partnerNFTAbove1000 > 0.5) partnerNFTAbove1000 = 0.5;
-	// Governance and streak bonuses
-	$: governanceBonus = governanceVotes ? 0.1 : 0; // 10% for voters
-	$: streakBonus = Math.min(seasonStreaks * 0.05 - 0.05, 1.0); // 5% per season, capped at 100%
-	$: if (streakBonus < 0) streakBonus = 0;
-
-	$: myBlueRewardBonus = myBlueReward ? 0.25 : 0; // 25% for myBlueReward
-
-	$: {
-		storage.setCookie('xbgAmount', xbgAmount.toString(), 60 * 60 * 24 * 30);
-		storage.setCookie('currentXBGPrice', currentXBGPrice.toString(), 60 * 60 * 24 * 30);
-		storage.setCookie('prometheusCount', prometheusCount.toString(), 60 * 60 * 24 * 30);
-		storage.setCookie('chestplateCount', chestplateCount.toString(), 60 * 60 * 24 * 30);
-		storage.setCookie(
-			'partnerNFTBelow1000Count',
-			partnerNFTBelow1000Count.toString(),
-			60 * 60 * 24 * 30
+		// State variables
+		xbgAmount = $state(+this.storage.getCookie('xbgAmount') || 100000);
+		currentXBGPrice = $state(+this.storage.getCookie('currentXBGPrice') || 0.25);
+		prometheusCount = $state(+this.storage.getCookie('prometheusCount') || 1);
+		chestplateCount = $state(+this.storage.getCookie('chestplateCount') || 1);
+		governanceVotes = $state(
+			this.storage.getCookie('governanceVotes') !== null
+				? this.storage.getCookie('governanceVotes') === 'true'
+				: true
 		);
-		storage.setCookie(
-			'partnerNFTAbove1000Count',
-			partnerNFTAbove1000Count.toString(),
-			60 * 60 * 24 * 30
+		seasonStreaks = $state(+this.storage.getCookie('seasonStreaks') || this.seasonNumber);
+		accumulateRewards = $state(true);
+		totalStakedXBG = $state(RewardsCalculator.DEFAULT_TOTAL_STAKED);
+
+		// Computed values using $derived
+		prometheusBonus = $derived(this.prometheusCount * 0.2);
+		chestplateBonus = $derived(this.chestplateCount * 0.025);
+		governanceBonus = $derived(this.governanceVotes ? 0.1 : 0);
+		streakBonus = $derived(Math.max(0, Math.min(this.seasonStreaks * 0.05 - 0.05, 1.0)));
+
+		totalMultiplier = $derived(
+			1 + this.prometheusBonus + this.chestplateBonus + this.governanceBonus + this.streakBonus
 		);
-		storage.setCookie('seasonStreaks', seasonStreaks.toString(), 60 * 60 * 24 * 30);
-		storage.setCookie('governanceVotes', governanceVotes.toString(), 60 * 60 * 24 * 30);
-		storage.setCookie('myBlueReward', myBlueReward.toString(), 60 * 60 * 24 * 30);
+
+		effectiveStakedAmount = $derived(this.xbgAmount * this.totalMultiplier);
+		poolShare = $derived(this.effectiveStakedAmount / RewardsCalculator.REWARDS_POOL_LIMIT / 100);
+		adjustedMonthlyReward = $derived(RewardsCalculator.REWARDS_POOL_LIMIT * this.poolShare);
+		effectiveAPY = $derived(((this.adjustedMonthlyReward * 12) / this.xbgAmount) * 100);
+		poolUtilization = $derived((this.totalStakedXBG / RewardsCalculator.REWARDS_POOL_LIMIT) * 100);
+
+		monthlyRewards = $derived(this.calculateMonthlyRewards());
+
+		initialize() {
+			this.setupStorageSync();
+			this.clearIrrelevantCookies();
+		}
+
+		private calculateMonthlyRewards() {
+			return Array.from({ length: 12 }, (_, i) => {
+				if (this.accumulateRewards) {
+					let cumulativeStaked = this.effectiveStakedAmount;
+					let cumulativeReward = 0;
+					for (let j = 0; j <= i; j++) {
+						let monthlyReward =
+							RewardsCalculator.REWARDS_POOL_LIMIT *
+							(cumulativeStaked / RewardsCalculator.REWARDS_POOL_LIMIT / 100);
+						cumulativeReward += monthlyReward;
+						cumulativeStaked += monthlyReward;
+					}
+					return {
+						month: i + 1,
+						reward: cumulativeReward / (i + 1),
+						cumulative: cumulativeReward
+					};
+				} else {
+					return {
+						month: i + 1,
+						reward: this.adjustedMonthlyReward,
+						cumulative: this.adjustedMonthlyReward * (i + 1)
+					};
+				}
+			});
+		}
+
+		private setupStorageSync() {
+			$effect(() => {
+				console.log('useeffect');
+
+				this.storage.setCookie('xbgAmount', this.xbgAmount.toString(), this.cookieExpiry);
+				this.storage.setCookie(
+					'currentXBGPrice',
+					this.currentXBGPrice.toString(),
+					this.cookieExpiry
+				);
+				this.storage.setCookie(
+					'prometheusCount',
+					this.prometheusCount.toString(),
+					this.cookieExpiry
+				);
+				this.storage.setCookie(
+					'chestplateCount',
+					this.chestplateCount.toString(),
+					this.cookieExpiry
+				);
+				this.storage.setCookie('seasonStreaks', this.seasonStreaks.toString(), this.cookieExpiry);
+				this.storage.setCookie(
+					'governanceVotes',
+					this.governanceVotes.toString(),
+					this.cookieExpiry
+				);
+			});
+		}
+
+		private clearIrrelevantCookies() {
+			this.storage.deleteCookie('partnerNFTBelow1000Count');
+			this.storage.deleteCookie('partnerNFTAbove1000Count');
+			if (+this.storage.getCookie('seasonStreaks') === this.seasonNumber - 1) {
+				this.storage.deleteCookie('seasonStreaks');
+				this.seasonStreaks = this.seasonNumber;
+				this.storage.setCookie('seasonStreaks', this.seasonStreaks.toString(), this.cookieExpiry);
+			}
+		}
 	}
 
-	// Calculate total multiplier (all bonuses are additive)
-	$: totalMultiplier =
-		1 +
-		prometheusBonus +
-		chestplateBonus +
-		governanceBonus +
-		streakBonus +
-		partnerNFTBelow1000 +
-		partnerNFTAbove1000 +
-		myBlueRewardBonus;
-	// Calculate total staked amount including multiplier
-	$: effectiveStakedAmount = xbgAmount * totalMultiplier;
-
-	// Calculate rewards with pool limit consideration
-	$: poolShare = effectiveStakedAmount / REWARDS_POOL_LIMIT / 100;
-	$: adjustedMonthlyReward = REWARDS_POOL_LIMIT * poolShare;
-	// $: console.log(poolShare, effectiveStakedAmount, REWARDS_POOL_LIMIT);
-
-	$: monthlyRewards = Array.from({ length: 12 }, (_, i) => {
-		if (accumulateRewards) {
-			let cumulativeStaked = effectiveStakedAmount;
-			let cumulativeReward = 0;
-			for (let j = 0; j <= i; j++) {
-				let monthlyReward = REWARDS_POOL_LIMIT * (cumulativeStaked / REWARDS_POOL_LIMIT / 100);
-				cumulativeReward += monthlyReward;
-				cumulativeStaked += monthlyReward;
-			}
-			return {
-				month: i + 1,
-				reward: cumulativeReward / (i + 1),
-				cumulative: cumulativeReward
-			};
-		} else {
-			return {
-				month: i + 1,
-				reward: adjustedMonthlyReward,
-				cumulative: adjustedMonthlyReward * (i + 1)
-			};
-		}
-	});
-
-	$: effectiveAPY = ((adjustedMonthlyReward * 12) / xbgAmount) * 100;
-	$: poolUtilization = (totalStakedXBG / REWARDS_POOL_LIMIT) * 100;
-
-	onMount(async () => {});
-
-	const formatter = new Intl.NumberFormat('en-US', {
-		style: 'decimal',
-		minimumFractionDigits: 0,
-		maximumFractionDigits: 2
-	});
+	const calculator = new RewardsCalculator();
+	onMount(() => calculator.initialize());
 </script>
 
 <div id="frame" class="min-h-screen text-white p-8 relative" style="overflow-x: hidden;">
@@ -146,7 +152,7 @@
 		<p class="text-gray-400 mb-4 mx-auto text-center">Boost Your Rewards with NFTs and Voting</p>
 		<button
 			class="flex items-center gap-2 mx-auto mb-9 mt-2 align-self-center button bg-white/10 px-6 py-2 rounded-lg text-white hover:bg-white/20"
-			on:click={() => (boostModalOpen = true)}
+			on:click={() => (calculator.boostModalOpen = true)}
 		>
 			<Xborg size={19} /> Boost Overview
 		</button>
@@ -156,24 +162,29 @@
 		</div> -->
 
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-			<RewardInput id="xbg-amount" label="XBG Amount You Pledged" bind:value={xbgAmount} min={0} />
+			<RewardInput
+				id="xbg-amount"
+				label="XBG Amount You Pledged"
+				bind:value={calculator.xbgAmount}
+				min={0}
+			/>
 			<RewardInput
 				id="prometheus-nfts"
 				label="Number of Prometheuses You Own"
-				bind:value={prometheusCount}
+				bind:value={calculator.prometheusCount}
 				min={0}
 				step={1}
 			/>
 			<RewardInput
 				id="chestplate-nfts"
 				label="Number of Chestplates You Own"
-				bind:value={chestplateCount}
+				bind:value={calculator.chestplateCount}
 				min={0}
 				step={1}
 			/>
-			<RewardInput
+			<!-- <RewardInput
 				id="partner-nfts-below-1000"
-				label="Number of Partner NFTs <$1000 FP"
+				
 				sublabel="Worth less than $1000 each"
 				bind:value={partnerNFTBelow1000Count}
 				min={0}
@@ -186,7 +197,7 @@
 				bind:value={partnerNFTAbove1000Count}
 				min={0}
 				step={1}
-			/>
+			/> -->
 			<!-- <RewardInput
 				id="governance-votes"
 				label="Governance Votes"
@@ -197,7 +208,7 @@
 			<RewardInput
 				id="season-streaks"
 				label="Season Streaks You Participated In"
-				bind:value={seasonStreaks}
+				bind:value={calculator.seasonStreaks}
 				min={0}
 				max={20}
 				step={1}
@@ -206,13 +217,13 @@
 				id="total-staked-xbg"
 				label="Total XBG Pledged (Current Season)"
 				link="https://xbg.xborg.com/analytics"
-				bind:value={totalStakedXBG}
+				bind:value={calculator.totalStakedXBG}
 				min={0}
 			/>
 			<RewardInput
 				id="total-staked-xbg"
 				label="Current XBG Price (in $)"
-				bind:value={currentXBGPrice}
+				bind:value={calculator.currentXBGPrice}
 				min={0}
 			/>
 			<!-- <RewardInput
@@ -227,12 +238,12 @@
 					<input
 						type="checkbox"
 						id="governanceVotes"
-						bind:checked={governanceVotes}
+						bind:checked={calculator.governanceVotes}
 						class="form-checkbox h-5 w-5 text-blue-600"
 					/>
 					<span class="ml-2 text-gray-400">Governance Voter</span>
 				</label>
-				<label for="myblueReward" class="flex items-center">
+				<!-- <label for="myblueReward" class="flex items-center">
 					<input
 						type="checkbox"
 						id="myblueReward"
@@ -240,12 +251,12 @@
 						class="form-checkbox h-5 w-5 text-blue-600"
 					/>
 					<span class="ml-2 text-gray-400">MyBlue Bonus</span>
-				</label>
+				</label> -->
 				<label for="accumulate-rewards" class="flex items-center">
 					<input
 						type="checkbox"
 						id="accumulate-rewards"
-						bind:checked={accumulateRewards}
+						bind:checked={calculator.accumulateRewards}
 						class="form-checkbox h-5 w-5 text-blue-600"
 					/>
 					<span class="ml-2 text-gray-400">Accumulate Rewards</span>
@@ -255,24 +266,28 @@
 
 		<div class="multiplierSetting p-6 rounded-lg mb-8">
 			<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-				<RewardStats label="Prometheus Bonus" value={prometheusBonus * 100} />
-				<RewardStats label="Chestplate Bonus" value={chestplateBonus * 100} />
-				<RewardStats
+				<RewardStats label="Prometheus Bonus" value={calculator.prometheusBonus * 100} />
+				<RewardStats label="Chestplate Bonus" value={calculator.chestplateBonus * 100} />
+				<!-- <RewardStats
 					label="Partner NFTs Bonus"
-					value={(partnerNFTBelow1000 + partnerNFTAbove1000) * 100}
+					value={(calculator.partnerNFTBelow1000 + calculator.partnerNFTAbove1000) * 100}
+				/> -->
+				<RewardStats label="Governance Bonus" value={calculator.governanceBonus * 100} />
+				<RewardStats label="Streak Bonus" value={calculator.streakBonus * 100} />
+				<RewardStats
+					label="Seasonal Rewards Pool"
+					value="{RewardsCalculator.REWARDS_POOL_LIMIT} XBG"
+					suffix=""
 				/>
-				<RewardStats label="Governance Bonus" value={governanceBonus * 100} />
-				<RewardStats label="Streak Bonus" value={streakBonus * 100} />
-				<RewardStats label="Seasonal Rewards Pool" value="{REWARDS_POOL_LIMIT} XBG" suffix="" />
-				<RewardStats label="Additional Multipliers" value={myBlueRewardBonus * 100} />
-				<RewardStats label="Total Multiplier" value={totalMultiplier} suffix="" />
+				<!-- <RewardStats label="Additional Multipliers" value={calculator.myBlueRewardBonus * 100} /> -->
+				<RewardStats label="Total Multiplier" value={calculator.totalMultiplier} suffix="" />
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-1 gap-4 border-t border-gray-600 pt-4">
 				<div>
 					<h3 class="text-sm text-gray-500 font-semibold mb-2">
 						Your Total Pledge Amount Including Multipliers:
 					</h3>
-					<p class="text-2xl text-green-400">{effectiveStakedAmount.toFixed(2)} XBG</p>
+					<p class="text-2xl text-green-400">{calculator.effectiveStakedAmount.toFixed(2)} XBG</p>
 				</div>
 			</div>
 		</div>
@@ -283,41 +298,46 @@
 				<div>
 					<p class="text-sm text-gray-400">Seasonal Rewards (Monthly):</p>
 					<p class="text-2xl text-yellow-400">
-						{Math.round(adjustedMonthlyReward)} XBG
+						{Math.round(calculator.adjustedMonthlyReward)} XBG
 						<span class="text-lg"
-							>(~${Math.round(currentXBGPrice * Number(adjustedMonthlyReward.toFixed(2))).toFixed(
-								2
-							)})</span
+							>(~${Math.round(
+								calculator.currentXBGPrice * Number(calculator.adjustedMonthlyReward.toFixed(2))
+							).toFixed(2)})</span
 						>
 					</p>
 				</div>
 				<div>
 					<p class="text-sm text-gray-400">Annual Rewards:</p>
 					<p class="text-2xl text-yellow-400">
-						{Math.round(monthlyRewards[monthlyRewards.length - 1].cumulative)} XBG
+						{Math.round(calculator.monthlyRewards[calculator.monthlyRewards.length - 1].cumulative)}
+						XBG
 						<span class="text-lg"
 							>(~${Math.round(
-								currentXBGPrice *
-									Number(monthlyRewards[monthlyRewards.length - 1].cumulative.toFixed(2))
+								calculator.currentXBGPrice *
+									Number(
+										calculator.monthlyRewards[
+											calculator.monthlyRewards.length - 1
+										].cumulative.toFixed(2)
+									)
 							).toFixed(2)})</span
 						>
 					</p>
 				</div>
 			</div>
 			<p class="text-sm text-gray-300 mt-2 font-bold">
-				Effective APY: {effectiveAPY.toFixed(2)}%
+				Effective APY: {calculator.effectiveAPY.toFixed(2)}%
 				<!-- {#if (xbgAmount * totalMultiplier) / 12 > adjustedMonthlyReward}
 					<span class="text-orange-400 ml-2">(Limited by rewards pool)</span>
 				{/if} -->
 				<!-- <RewardStats label="Pool Utilization" value={poolUtilization} /> -->
 			</p>
 			<p class="text-xs text-gray-300 mt-1">
-				Pool Share: {(poolShare * 100).toFixed(4)}% | Pool Utilization: {poolUtilization}%
+				Pool Share: {(calculator.poolShare * 100).toFixed(4)}% | Pool Utilization: {calculator.poolUtilization}%
 			</p>
 		</div>
 
-		{#key monthlyRewards}
-			<RewardChart {monthlyRewards} />
+		{#key calculator.monthlyRewards}
+			<RewardChart monthlyRewards={calculator.monthlyRewards} />
 		{/key}
 
 		<p class="text-sm text-gray-400 mt-4">
@@ -339,7 +359,7 @@
 	</div>
 </div>
 
-<Modal bind:open={boostModalOpen}>
+<Modal bind:open={calculator.boostModalOpen}>
 	<h1>Boost Overview</h1>
 
 	<section>
@@ -353,14 +373,15 @@
 
 	<section>
 		<h2>Partner NFTs</h2>
-		<ul>
+		<p>Currently not available</p>
+		<!-- <ul>
 			<li><span class="text-white">&gt;$1,000 FP</span>: 10% boost per NFT (cap at 50%)</li>
 			<li><span class="text-white">&lt;$1,000 FP</span>: 5% boost per NFT (cap at 20%)</li>
-		</ul>
+		</ul> -->
 	</section>
 
 	<section class="flex flex-wrap gap-2 text-sm text-gray-400">
-		<a href="https://x.com/OverworldPlay" class="underline" target="_blank">@OverworldPlay</a>
+		<!-- <a href="https://x.com/OverworldPlay" class="underline" target="_blank">@OverworldPlay</a>
 		<a href="https://x.com/GAM3Sgg_" class="underline" target="_blank">@GAM3Sgg_</a>
 		<a href="https://x.com/Overlord_xyz" class="underline" target="_blank">@Overlord_xyz</a>
 		<a href="https://x.com/aiarena_" class="underline" target="_blank">@aiarena_</a>
@@ -372,7 +393,7 @@
 		<a href="https://x.com/JirasanOfficial" class="underline" target="_blank">@JirasanOfficial</a>
 		<a href="https://x.com/Azuki" class="underline" target="_blank">@Azuki</a>
 		<a href="https://x.com/pudgypenguins" class="underline" target="_blank">@pudgypenguins</a>
-		<a href="https://x.com/PirateNation" class="underline" target="_blank">@PirateNation</a>
+		<a href="https://x.com/PirateNation" class="underline" target="_blank">@PirateNation</a> -->
 
 		<div class="block w-full text-left mt-2 flex-break text-blue-500">
 			<a href="https://x.com/XBorgHQ" class="" target="_blank">Check on X for latest partner NFTs</a
