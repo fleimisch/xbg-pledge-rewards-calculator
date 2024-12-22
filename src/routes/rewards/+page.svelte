@@ -30,15 +30,26 @@
 		seasonStreaks = $state(+this.storage.getCookie('seasonStreaks') || this.seasonNumber);
 		accumulateRewards = $state(true);
 		totalStakedXBG = $state(RewardsCalculator.DEFAULT_TOTAL_STAKED);
+		myBlueReward = $state(
+			this.storage.getCookie('myBlueReward') !== null
+				? this.storage.getCookie('myBlueReward') === 'true'
+				: true
+		);
 
 		// Computed values using $derived
 		prometheusBonus = $derived(this.prometheusCount * 0.2);
 		chestplateBonus = $derived(this.chestplateCount * 0.025);
 		governanceBonus = $derived(this.governanceVotes ? 0.1 : 0);
+		myBlueRewardBonus = $derived(this.myBlueReward ? 0.25 : 0);
 		streakBonus = $derived(Math.max(0, Math.min(this.seasonStreaks * 0.05 - 0.05, 1.0)));
 
 		totalMultiplier = $derived(
-			1 + this.prometheusBonus + this.chestplateBonus + this.governanceBonus + this.streakBonus
+			1 +
+				this.prometheusBonus +
+				this.chestplateBonus +
+				this.governanceBonus +
+				this.streakBonus +
+				this.myBlueRewardBonus
 		);
 
 		effectiveStakedAmount = $derived(this.xbgAmount * this.totalMultiplier);
@@ -107,6 +118,7 @@
 					this.governanceVotes.toString(),
 					this.cookieExpiry
 				);
+				this.storage.setCookie('myBlueReward', this.myBlueReward.toString(), this.cookieExpiry);
 			});
 		}
 
@@ -243,15 +255,15 @@
 					/>
 					<span class="ml-2 text-gray-400">Governance Voter</span>
 				</label>
-				<!-- <label for="myblueReward" class="flex items-center">
+				<label for="myblueReward" class="flex items-center">
 					<input
 						type="checkbox"
 						id="myblueReward"
-						bind:checked={myBlueReward}
+						bind:checked={calculator.myBlueReward}
 						class="form-checkbox h-5 w-5 text-blue-600"
 					/>
-					<span class="ml-2 text-gray-400">MyBlue Bonus</span>
-				</label> -->
+					<span class="ml-2 text-gray-400">NIP Quest Bonus</span>
+				</label>
 				<label for="accumulate-rewards" class="flex items-center">
 					<input
 						type="checkbox"
@@ -279,7 +291,7 @@
 					value="{RewardsCalculator.REWARDS_POOL_LIMIT} XBG"
 					suffix=""
 				/>
-				<!-- <RewardStats label="Additional Multipliers" value={calculator.myBlueRewardBonus * 100} /> -->
+				<RewardStats label="Additional Multipliers" value={calculator.myBlueRewardBonus * 100} />
 				<RewardStats label="Total Multiplier" value={calculator.totalMultiplier} suffix="" />
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-1 gap-4 border-t border-gray-600 pt-4">
