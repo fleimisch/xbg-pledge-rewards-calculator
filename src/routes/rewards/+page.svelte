@@ -194,8 +194,8 @@
 		>
 			{#if !calculator.season5Special()}
 				<span class="text-red-500 text-sm">
-					You are not eligible for rewards. Wearable Bonus and Governance Voter are required for
-					Season 5.
+					Wearable Bonus and Governance Voter are required for Season 5. Both will be available for
+					you to claim in January.
 				</span>
 			{:else}
 				Season 5 Rewards
