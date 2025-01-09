@@ -35,12 +35,18 @@
 				? this.storage.getCookie('myBlueReward') === 'true'
 				: true
 		);
+		seasonBonusReward = $state(
+			this.storage.getCookie('seasonBonus') !== null
+				? this.storage.getCookie('seasonBonus') === 'true'
+				: true
+		);
 
 		// Computed values using $derived
 		prometheusBonus = $derived(this.prometheusCount * 0.2);
 		chestplateBonus = $derived(this.chestplateCount * 0.025);
 		governanceBonus = $derived(this.governanceVotes ? 0.1 : 0);
 		myBlueRewardBonus = $derived(this.myBlueReward ? 0.25 : 0);
+		seasonBonus = $derived(this.seasonBonusReward ? 0 : 0);
 		streakBonus = $derived(Math.max(0, Math.min(this.seasonStreaks * 0.05 - 0.05, 1.0)));
 
 		totalMultiplier = $derived(
@@ -49,7 +55,8 @@
 				this.chestplateBonus +
 				this.governanceBonus +
 				this.streakBonus +
-				this.myBlueRewardBonus
+				this.myBlueRewardBonus +
+				this.seasonBonus
 		);
 
 		effectiveStakedAmount = $derived(this.xbgAmount * this.totalMultiplier * this.season5Special());
@@ -67,7 +74,7 @@
 
 		season5Special() {
 			// no rewards for not myblue and not governance votes
-			if (!this.myBlueReward || !this.governanceVotes) {
+			if (!this.seasonBonusReward || !this.governanceVotes) {
 				return 0;
 			} else {
 				return 1;
@@ -187,7 +194,7 @@
 		>
 			{#if !calculator.season5Special()}
 				<span class="text-red-500 text-sm">
-					You are not eligible for rewards. NIP Quest Bonus and Governance Voter are required for
+					You are not eligible for rewards. Wearable Bonus and Governance Voter are required for
 					Season 5.
 				</span>
 			{:else}
@@ -209,6 +216,15 @@
 					/>
 					<span class="ml-2 text-gray-400">Governance Voter</span>
 				</label>
+				<label for="seasonBonusReward" class="flex items-center">
+					<input
+						type="checkbox"
+						id="seasonBonusReward"
+						bind:checked={calculator.seasonBonusReward}
+						class="form-checkbox h-5 w-5 text-blue-600"
+					/>
+					<span class="ml-2 text-gray-400">NIP Quest - Wearable</span>
+				</label>
 				<label for="myblueReward" class="flex items-center">
 					<input
 						type="checkbox"
@@ -216,7 +232,7 @@
 						bind:checked={calculator.myBlueReward}
 						class="form-checkbox h-5 w-5 text-blue-600"
 					/>
-					<span class="ml-2 text-gray-400">NIP Quest Bonus</span>
+					<span class="ml-2 text-gray-400">NIP Quest - Mask</span>
 				</label>
 				<label for="accumulate-rewards" class="flex items-center">
 					<input
@@ -315,7 +331,10 @@
 					value="{RewardsCalculator.REWARDS_POOL_LIMIT} XBG"
 					suffix=""
 				/>
-				<RewardStats label="Additional Multipliers" value={calculator.myBlueRewardBonus * 100} />
+				<RewardStats
+					label="Additional Multipliers"
+					value={calculator.myBlueRewardBonus * 100 + calculator.seasonBonus * 100}
+				/>
 				<RewardStats label="Total Multiplier" value={calculator.totalMultiplier} suffix="" />
 			</div>
 			<div class="grid grid-cols-1 md:grid-cols-1 gap-4 border-t border-gray-600 pt-4">
