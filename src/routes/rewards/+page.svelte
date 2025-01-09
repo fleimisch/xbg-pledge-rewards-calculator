@@ -52,7 +52,7 @@
 				this.myBlueRewardBonus
 		);
 
-		effectiveStakedAmount = $derived(this.xbgAmount * this.totalMultiplier);
+		effectiveStakedAmount = $derived(this.xbgAmount * this.totalMultiplier * this.season5Special());
 		poolShare = $derived(this.effectiveStakedAmount / RewardsCalculator.REWARDS_POOL_LIMIT / 100);
 		adjustedMonthlyReward = $derived(RewardsCalculator.REWARDS_POOL_LIMIT * this.poolShare);
 		effectiveAPY = $derived(((this.adjustedMonthlyReward * 12) / this.xbgAmount) * 100);
@@ -63,6 +63,15 @@
 		initialize() {
 			this.setupStorageSync();
 			this.clearIrrelevantCookies();
+		}
+
+		season5Special() {
+			// no rewards for not myblue and not governance votes
+			if (!this.myBlueReward || !this.governanceVotes) {
+				return 0;
+			} else {
+				return 1;
+			}
 		}
 
 		private calculateMonthlyRewards() {
@@ -163,7 +172,7 @@
 		</h1>
 		<p class="text-gray-400 mb-4 mx-auto text-center">Boost Your Rewards with NFTs and Voting</p>
 		<button
-			class="flex items-center gap-2 mx-auto mb-9 mt-2 align-self-center button bg-white/10 px-6 py-2 rounded-lg text-white hover:bg-white/20"
+			class="flex items-center gap-2 mx-auto mb-10 mt-2 align-self-center button bg-white/10 px-6 py-2 rounded-lg text-white hover:bg-white/20"
 			on:click={() => (calculator.boostModalOpen = true)}
 		>
 			<Xborg size={19} /> Boost Overview
@@ -173,7 +182,52 @@
 			<RewardInputWallet label="Your Wallet Address" />
 		</div> -->
 
+		<div
+			class="text-1xl font-bold mb-5 w-full text-center bg-white/10 p-2 rounded-lg flex items-center justify-center flex-col"
+		>
+			{#if !calculator.season5Special()}
+				<span class="text-red-500 text-sm">
+					You are not eligible for rewards. NIP Quest Bonus and Governance Voter are required for
+					Season 5.
+				</span>
+			{:else}
+				Season 5 Rewards
+			{/if}
+		</div>
+
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+			<RewardInput
+				className="flex flex-col gap-1 justify-center select-none"
+				error={!calculator.season5Special()}
+			>
+				<label for="governanceVotes" class="flex items-center">
+					<input
+						type="checkbox"
+						id="governanceVotes"
+						bind:checked={calculator.governanceVotes}
+						class="form-checkbox h-5 w-5 text-blue-600"
+					/>
+					<span class="ml-2 text-gray-400">Governance Voter</span>
+				</label>
+				<label for="myblueReward" class="flex items-center">
+					<input
+						type="checkbox"
+						id="myblueReward"
+						bind:checked={calculator.myBlueReward}
+						class="form-checkbox h-5 w-5 text-blue-600"
+					/>
+					<span class="ml-2 text-gray-400">NIP Quest Bonus</span>
+				</label>
+				<label for="accumulate-rewards" class="flex items-center">
+					<input
+						type="checkbox"
+						id="accumulate-rewards"
+						bind:checked={calculator.accumulateRewards}
+						class="form-checkbox h-5 w-5 text-blue-600"
+					/>
+					<span class="ml-2 text-gray-400">Accumulate Rewards</span>
+				</label>
+			</RewardInput>
 			<RewardInput
 				id="xbg-amount"
 				label="XBG Amount You Pledged"
@@ -244,36 +298,6 @@
 				bind:value={REWARDS_POOL_LIMIT}
 				min={0}
 			/> -->
-
-			<RewardInput className="flex flex-col gap-1 justify-center select-none">
-				<label for="governanceVotes" class="flex items-center">
-					<input
-						type="checkbox"
-						id="governanceVotes"
-						bind:checked={calculator.governanceVotes}
-						class="form-checkbox h-5 w-5 text-blue-600"
-					/>
-					<span class="ml-2 text-gray-400">Governance Voter</span>
-				</label>
-				<label for="myblueReward" class="flex items-center">
-					<input
-						type="checkbox"
-						id="myblueReward"
-						bind:checked={calculator.myBlueReward}
-						class="form-checkbox h-5 w-5 text-blue-600"
-					/>
-					<span class="ml-2 text-gray-400">NIP Quest Bonus</span>
-				</label>
-				<label for="accumulate-rewards" class="flex items-center">
-					<input
-						type="checkbox"
-						id="accumulate-rewards"
-						bind:checked={calculator.accumulateRewards}
-						class="form-checkbox h-5 w-5 text-blue-600"
-					/>
-					<span class="ml-2 text-gray-400">Accumulate Rewards</span>
-				</label>
-			</RewardInput>
 		</div>
 
 		<div class="multiplierSetting p-6 rounded-lg mb-8">

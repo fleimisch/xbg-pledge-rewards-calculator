@@ -40,6 +40,7 @@ declare module '$env/static/private' {
 	export const CommonProgramW6432: string;
 	export const COMPUTERNAME: string;
 	export const ComSpec: string;
+	export const CURSOR_TRACE_ID: string;
 	export const DriverData: string;
 	export const EDITOR: string;
 	export const EFC_14120: string;
@@ -160,6 +161,7 @@ declare module '$env/dynamic/private' {
 		CommonProgramW6432: string;
 		COMPUTERNAME: string;
 		ComSpec: string;
+		CURSOR_TRACE_ID: string;
 		DriverData: string;
 		EDITOR: string;
 		EFC_14120: string;

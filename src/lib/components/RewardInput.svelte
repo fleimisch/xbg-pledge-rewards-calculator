@@ -6,9 +6,10 @@
 	export let max: number | undefined = undefined;
 	export let link: string | undefined = undefined;
 	export let className: string = '';
+	export let error: boolean = false;
 </script>
 
-<div class="multiplierSetting p-4 pb-6 rounded-lg relative {className}">
+<div class="multiplierSetting p-4 pb-6 rounded-lg relative {className}" class:error>
 	{#if label}
 		<label class="block mb-2 text-sm">{label}</label>
 	{/if}
@@ -46,6 +47,10 @@
 		border: 1px solid rgba(91, 91, 94, 0.55);
 	}
 
+	.multiplierSetting.error {
+		background: hsla(346, 97%, 36%, 0.285);
+		border: 1px solid rgba(234, 8, 8, 0.55);
+	}
 	.multiplierInput {
 		background: hsla(240, 8%, 3%, 0.285);
 		border: 1px solid rgba(91, 91, 94, 0.55);
