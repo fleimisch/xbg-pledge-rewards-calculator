@@ -29,7 +29,9 @@
 		);
 		seasonStreaks = $state(+this.storage.getCookie('seasonStreaks') || this.seasonNumber);
 		accumulateRewards = $state(true);
-		totalStakedXBG = $state(RewardsCalculator.DEFAULT_TOTAL_STAKED);
+		totalStakedXBG = $state(
+			+this.storage.getCookie('totalStakedXBG') || RewardsCalculator.DEFAULT_TOTAL_STAKED
+		);
 		myBlueReward = $state(
 			this.storage.getCookie('myBlueReward') !== null
 				? this.storage.getCookie('myBlueReward') === 'true'
@@ -60,7 +62,7 @@
 		);
 
 		effectiveStakedAmount = $derived(this.xbgAmount * this.totalMultiplier * this.season5Special());
-		poolShare = $derived(this.effectiveStakedAmount / RewardsCalculator.REWARDS_POOL_LIMIT / 100);
+		poolShare = $derived(this.effectiveStakedAmount / this.totalStakedXBG);
 		adjustedMonthlyReward = $derived(RewardsCalculator.REWARDS_POOL_LIMIT * this.poolShare);
 		effectiveAPY = $derived(((this.adjustedMonthlyReward * 12) / this.xbgAmount) * 100);
 		poolUtilization = $derived((this.totalStakedXBG / RewardsCalculator.REWARDS_POOL_LIMIT) * 100);
@@ -70,12 +72,17 @@
 		initialize() {
 			this.setupStorageSync();
 			this.clearIrrelevantCookies();
+			console.log(
+				'%csrc\routes\rewards+page.svelte:75 this.xbgAmount * this.totalMultiplier * this.season5Special()',
+				'color: #007acc;',
+				this.monthlyRewards
+			);
 		}
 
 		season5Special() {
 			// no rewards for not myblue and not governance votes
 			if (!this.seasonBonusReward || !this.governanceVotes) {
-				return 0;
+				return 1;
 			} else {
 				return 1;
 			}
@@ -88,8 +95,7 @@
 					let cumulativeReward = 0;
 					for (let j = 0; j <= i; j++) {
 						let monthlyReward =
-							RewardsCalculator.REWARDS_POOL_LIMIT *
-							(cumulativeStaked / RewardsCalculator.REWARDS_POOL_LIMIT / 100);
+							RewardsCalculator.REWARDS_POOL_LIMIT * (cumulativeStaked / calculator.totalStakedXBG);
 						cumulativeReward += monthlyReward;
 						cumulativeStaked += monthlyReward;
 					}
@@ -110,8 +116,6 @@
 
 		private setupStorageSync() {
 			$effect(() => {
-				console.log('useeffect');
-
 				this.storage.setCookie('xbgAmount', this.xbgAmount.toString(), this.cookieExpiry);
 				this.storage.setCookie(
 					'currentXBGPrice',
@@ -135,6 +139,7 @@
 					this.cookieExpiry
 				);
 				this.storage.setCookie('myBlueReward', this.myBlueReward.toString(), this.cookieExpiry);
+				this.storage.setCookie('totalStakedXBG', this.totalStakedXBG.toString(), this.cookieExpiry);
 			});
 		}
 
@@ -192,7 +197,7 @@
 		<div
 			class="text-1xl font-bold mb-5 w-full text-center bg-white/10 p-2 rounded-lg flex items-center justify-center flex-col"
 		>
-			{#if !calculator.season5Special()}
+			{#if !calculator.seasonBonusReward || !calculator.governanceVotes}
 				<span class="text-red-500 text-sm">
 					Wearable Bonus and Governance Voter are required for Season 5. Both will be available for
 					you to claim in January.
