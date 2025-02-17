@@ -12,7 +12,7 @@
 		static readonly DEFAULT_TOTAL_STAKED = 75_000_000; // 50M XBG tokens staked
 
 		seasonNumber = 4;
-		rewardsReducerStillUknown = 0.45;
+		rewardsReducerStillUknown = 0.40;
 
 		storage = new Storage();
 		boostModalOpen = $state(false);
@@ -386,8 +386,8 @@
 						Your XBG Holder Score:
 					</h3>
 					<div class="flex items-center gap-3">
-						<p class="text-2xl text-blue-400">{calculator.holderScore.toFixed(2)}</p>
-						<a href="https://xbg.xborg.com/leaderboard" target="_blank" class="px-3 py-1 text-sm bg-white/10 hover:bg-white/20 rounded-lg text-white">View Leaderboard</a>
+						<p class="text-2xl text-white">{calculator.holderScore.toFixed(2)}</p>
+						<a href="https://xbg.xborg.com/leaderboard" target="_blank" class="px-3 py-1 text-sm bg-red-900/40 hover:bg-red-900/30 border border-red-900 rounded-lg text-white">View Leaderboard</a>
 					</div>
 					<p class="text-xs text-gray-400">sqrt(pledge amount) * multiplier</p>
 				</div>
