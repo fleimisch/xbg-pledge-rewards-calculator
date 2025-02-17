@@ -12,6 +12,7 @@
 		static readonly DEFAULT_TOTAL_STAKED = 75_000_000; // 50M XBG tokens staked
 
 		seasonNumber = 4;
+		rewardsReducerStillUknown = 0.45;
 
 		storage = new Storage();
 		boostModalOpen = $state(false);
@@ -23,33 +24,51 @@
 		prometheusCount = $state(+this.storage.getCookie('prometheusCount') || 1);
 		chestplateCount = $state(+this.storage.getCookie('chestplateCount') || 1);
 		governanceVotes = $state(
-			this.storage.getCookie('governanceVotes') !== null
-				? this.storage.getCookie('governanceVotes') === 'true'
-				: true
+			+this.storage.getCookie('governanceVotes') || 0
 		);
 		seasonStreaks = $state(+this.storage.getCookie('seasonStreaks') || this.seasonNumber);
 		accumulateRewards = $state(true);
 		totalStakedXBG = $state(
 			+this.storage.getCookie('totalStakedXBG') || RewardsCalculator.DEFAULT_TOTAL_STAKED
 		);
-		myBlueReward = $state(
-			this.storage.getCookie('myBlueReward') !== null
-				? this.storage.getCookie('myBlueReward') === 'true'
-				: true
-		);
-		seasonBonusReward = $state(
-			this.storage.getCookie('seasonBonus') !== null
-				? this.storage.getCookie('seasonBonus') === 'true'
-				: true
-		);
+		communityAppTier = $state(this.storage.getCookie('communityAppTier') || 'remaining');
+		seasonLeaderboardTier = $state(this.storage.getCookie('seasonLeaderboardTier') || 'remaining');
 
 		// Computed values using $derived
 		prometheusBonus = $derived(this.prometheusCount * 0.2);
 		chestplateBonus = $derived(this.chestplateCount * 0.025);
-		governanceBonus = $derived(this.governanceVotes ? 0.1 : 0);
-		myBlueRewardBonus = $derived(this.myBlueReward ? 0.25 : 0);
-		seasonBonus = $derived(this.seasonBonusReward ? 0 : 0);
-		streakBonus = $derived(Math.max(0, Math.min(this.seasonStreaks * 0.05 - 0.05, 1.0)));
+		governanceBonus = $derived(
+			this.governanceVotes >= 5 ? 0.20 : // 20% for 5+ votes
+			this.governanceVotes >= 4 ? 0.15 : // 15% for 4-5 votes
+			this.governanceVotes >= 2 ? 0.10 : // 10% for 2-3 votes
+			this.governanceVotes >= 1 ? 0.05 : // 5% for 1 vote
+			0
+		);
+		pledgeIncreaseBonus = $derived(
+			this.xbgAmount >= 100_000 ? 0.30 : // 30% for 100k+ XBG
+			this.xbgAmount >= 50_000 ? 0.20 : // 20% for 50k+ XBG
+			this.xbgAmount >= 10_000 ? 0.05 : // 5% for 10k+ XBG
+			0
+		);
+		communityAppBonus = $derived(
+			this.communityAppTier === 'top1' ? 0.30 :
+			this.communityAppTier === 'top2.5' ? 0.25 :
+			this.communityAppTier === 'top5' ? 0.20 :
+			this.communityAppTier === 'top10' ? 0.15 :
+			this.communityAppTier === 'top25' ? 0.10 :
+			this.communityAppTier === 'top50' ? 0.05 :
+			0.025 // remaining
+		);
+		seasonLeaderboardBonus = $derived(
+			this.seasonLeaderboardTier === 'top1' ? 0.30 :    // Top 1% (1-10)
+			this.seasonLeaderboardTier === 'top2.5' ? 0.25 :  // Top 2.5% (11-25)
+			this.seasonLeaderboardTier === 'top5' ? 0.20 :    // Top 5% (26-50)
+			this.seasonLeaderboardTier === 'top10' ? 0.15 :   // Top 10% (51-100)
+			this.seasonLeaderboardTier === 'top25' ? 0.10 :   // Top 25% (101-250)
+			this.seasonLeaderboardTier === 'top50' ? 0.05 :   // Top 50% (251-500)
+			0.025                                             // Remaining
+		);
+		streakBonus = $derived(Math.min(this.seasonStreaks * 0.05, 1.0)); // Cap at 100% (1.0)
 
 		totalMultiplier = $derived(
 			1 +
@@ -57,15 +76,17 @@
 				this.chestplateBonus +
 				this.governanceBonus +
 				this.streakBonus +
-				this.myBlueRewardBonus +
-				this.seasonBonus
+				this.communityAppBonus +
+				this.seasonLeaderboardBonus +
+				this.pledgeIncreaseBonus
 		);
 
 		effectiveStakedAmount = $derived(this.xbgAmount * this.totalMultiplier * this.season5Special());
 		poolShare = $derived(this.effectiveStakedAmount / this.totalStakedXBG);
-		adjustedMonthlyReward = $derived(RewardsCalculator.REWARDS_POOL_LIMIT * this.poolShare);
+		adjustedMonthlyReward = $derived(RewardsCalculator.REWARDS_POOL_LIMIT * this.poolShare * (1 - this.rewardsReducerStillUknown));
 		effectiveAPY = $derived(((this.adjustedMonthlyReward * 12) / this.xbgAmount) * 100);
 		poolUtilization = $derived((this.totalStakedXBG / RewardsCalculator.REWARDS_POOL_LIMIT) * 100);
+		holderScore = $derived(Math.sqrt(this.xbgAmount) * this.totalMultiplier);
 
 		monthlyRewards = $derived(this.calculateMonthlyRewards());
 
@@ -80,8 +101,8 @@
 		}
 
 		season5Special() {
-			// no rewards for not myblue and not governance votes
-			if (!this.seasonBonusReward || !this.governanceVotes) {
+			// no rewards for not having governance votes
+			if (this.governanceVotes < 1) {
 				return 1;
 			} else {
 				return 1;
@@ -95,7 +116,7 @@
 					let cumulativeReward = 0;
 					for (let j = 0; j <= i; j++) {
 						let monthlyReward =
-							RewardsCalculator.REWARDS_POOL_LIMIT * (cumulativeStaked / calculator.totalStakedXBG);
+							RewardsCalculator.REWARDS_POOL_LIMIT * (cumulativeStaked / calculator.totalStakedXBG) * (1 - this.rewardsReducerStillUknown);
 						cumulativeReward += monthlyReward;
 						cumulativeStaked += monthlyReward;
 					}
@@ -138,7 +159,8 @@
 					this.governanceVotes.toString(),
 					this.cookieExpiry
 				);
-				this.storage.setCookie('myBlueReward', this.myBlueReward.toString(), this.cookieExpiry);
+				this.storage.setCookie('communityAppTier', this.communityAppTier, this.cookieExpiry);
+				this.storage.setCookie('seasonLeaderboardTier', this.seasonLeaderboardTier, this.cookieExpiry);
 				this.storage.setCookie('totalStakedXBG', this.totalStakedXBG.toString(), this.cookieExpiry);
 			});
 		}
@@ -197,64 +219,69 @@
 		<div
 			class="text-1xl font-bold mb-5 w-full text-center bg-white/10 p-2 rounded-lg flex items-center justify-center flex-col"
 		>
-			{#if !calculator.seasonBonusReward || !calculator.governanceVotes}
+			{#if !calculator.governanceVotes}
 				<span class="text-red-500 text-sm">
-					Wearable Bonus and Governance Voter are required for Season 5. Both will be available for
-					you to claim in January.
+					Season 6+ requires active participation in governance and in-app activities.
 				</span>
 			{:else}
-				Season 5 Rewards
+				Season 6 Rewards Calculator
 			{/if}
 		</div>
 
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-			<RewardInput
-				className="flex flex-col gap-1 justify-center select-none"
-				error={!calculator.season5Special()}
-			>
-				<label for="governanceVotes" class="flex items-center">
-					<input
-						type="checkbox"
-						id="governanceVotes"
-						bind:checked={calculator.governanceVotes}
-						class="form-checkbox h-5 w-5 text-blue-600"
-					/>
-					<span class="ml-2 text-gray-400">Governance Voter</span>
-				</label>
-				<label for="seasonBonusReward" class="flex items-center">
-					<input
-						type="checkbox"
-						id="seasonBonusReward"
-						bind:checked={calculator.seasonBonusReward}
-						class="form-checkbox h-5 w-5 text-blue-600"
-					/>
-					<span class="ml-2 text-gray-400">NIP Quest - Wearable</span>
-				</label>
-				<label for="myblueReward" class="flex items-center">
-					<input
-						type="checkbox"
-						id="myblueReward"
-						bind:checked={calculator.myBlueReward}
-						class="form-checkbox h-5 w-5 text-blue-600"
-					/>
-					<span class="ml-2 text-gray-400">NIP Quest - Mask</span>
-				</label>
-				<label for="accumulate-rewards" class="flex items-center">
-					<input
-						type="checkbox"
-						id="accumulate-rewards"
-						bind:checked={calculator.accumulateRewards}
-						class="form-checkbox h-5 w-5 text-blue-600"
-					/>
-					<span class="ml-2 text-gray-400">Accumulate Rewards</span>
-				</label>
-			</RewardInput>
-			<RewardInput
+		<RewardInput
 				id="xbg-amount"
 				label="XBG Amount You Pledged"
 				bind:value={calculator.xbgAmount}
 				min={0}
 			/>
+			<RewardInput
+				className="flex flex-col gap-1 justify-center select-none"
+				error={!calculator.season5Special()}
+				label="Community App Leaderboard Position"
+			>
+				<select
+					id="communityAppTier"
+					bind:value={calculator.communityAppTier}
+					class="w-full bg-[#1a1a1a] text-white px-3 py-2 rounded-lg border border-gray-700 focus:outline-none appearance-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-[#252525] transition-colors select-with-arrow"
+				>
+					<option value="top1" class="bg-[#1a1a1a]">Top 1%</option>
+					<option value="top2.5" class="bg-[#1a1a1a]">Top 2.5%</option>
+					<option value="top5" class="bg-[#1a1a1a]">Top 5%</option>
+					<option value="top10" class="bg-[#1a1a1a]">Top 10%</option>
+					<option value="top25" class="bg-[#1a1a1a]">Top 25%</option>
+					<option value="top50" class="bg-[#1a1a1a]">Top 50%</option>
+					<option value="remaining" class="bg-[#1a1a1a]">Remaining</option>
+				</select>
+				
+			</RewardInput>
+			<RewardInput label="Season Leaderboard Position"
+				className="flex flex-col gap-1 justify-center select-none"
+			>
+				<select
+					id="seasonLeaderboardTier"
+					bind:value={calculator.seasonLeaderboardTier}
+					class="w-full bg-[#1a1a1a] text-white px-3 py-2 rounded-lg border border-gray-700 focus:outline-none appearance-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-[#252525] transition-colors select-with-arrow"
+				>
+					<option value="top1" class="bg-[#1a1a1a]">Top 1% (1-10)</option>
+					<option value="top2.5" class="bg-[#1a1a1a]">Top 2.5% (11-25)</option>
+					<option value="top5" class="bg-[#1a1a1a]">Top 5% (26-50)</option>
+					<option value="top10" class="bg-[#1a1a1a]">Top 10% (51-100)</option>
+					<option value="top25" class="bg-[#1a1a1a]">Top 25% (101-250)</option>
+					<option value="top50" class="bg-[#1a1a1a]">Top 50% (251-500)</option>
+					<option value="remaining" class="bg-[#1a1a1a]">Remaining</option>
+				</select>
+			</RewardInput>
+			
+			<RewardInput
+				id="governance-votes"
+				label="Number of Governance Votes"
+				bind:value={calculator.governanceVotes}
+				min={0}
+				max={10}
+				step={1}
+			/>
+			
 			<RewardInput
 				id="prometheus-nfts"
 				label="Number of Prometheuses You Own"
@@ -294,7 +321,7 @@
 			/> -->
 			<RewardInput
 				id="season-streaks"
-				label="Season Streaks You Participated In"
+				label="Number of Consecutive Seasons"
 				bind:value={calculator.seasonStreaks}
 				min={0}
 				max={20}
@@ -331,23 +358,38 @@
 				/> -->
 				<RewardStats label="Governance Bonus" value={calculator.governanceBonus * 100} />
 				<RewardStats label="Streak Bonus" value={calculator.streakBonus * 100} />
-				<RewardStats
+				<RewardStats label="Pledge Increase Bonus" value={calculator.pledgeIncreaseBonus * 100} />
+				<!-- <RewardStats
 					label="Seasonal Rewards Pool"
 					value="{RewardsCalculator.REWARDS_POOL_LIMIT} XBG"
 					suffix=""
-				/>
+				/> -->
 				<RewardStats
-					label="Additional Multipliers"
-					value={calculator.myBlueRewardBonus * 100 + calculator.seasonBonus * 100}
+					label="Community App Bonus"
+					value={calculator.communityAppBonus * 100}
+				/>
+				<RewardStats 
+					label="Season Leaderboard"
+					value={calculator.seasonLeaderboardBonus * 100}
 				/>
 				<RewardStats label="Total Multiplier" value={calculator.totalMultiplier} suffix="" />
 			</div>
-			<div class="grid grid-cols-1 md:grid-cols-1 gap-4 border-t border-gray-600 pt-4">
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-600 pt-4">
 				<div>
 					<h3 class="text-sm text-gray-500 font-semibold mb-2">
 						Your Total Pledge Amount Including Multipliers:
 					</h3>
 					<p class="text-2xl text-green-400">{calculator.effectiveStakedAmount.toFixed(2)} XBG</p>
+				</div>
+				<div>
+					<h3 class="text-sm text-gray-500 font-semibold mb-2">
+						Your XBG Holder Score:
+					</h3>
+					<div class="flex items-center gap-3">
+						<p class="text-2xl text-blue-400">{calculator.holderScore.toFixed(2)}</p>
+						<a href="https://xbg.xborg.com/leaderboard" target="_blank" class="px-3 py-1 text-sm bg-white/10 hover:bg-white/20 rounded-lg text-white">View Leaderboard</a>
+					</div>
+					<p class="text-xs text-gray-400">sqrt(pledge amount) * multiplier</p>
 				</div>
 			</div>
 		</div>
@@ -382,6 +424,15 @@
 							).toFixed(2)})</span
 						>
 					</p>
+					<label for="accumulate-rewards" class="flex items-center mt-4">
+					<input
+						type="checkbox"
+						id="accumulate-rewards"
+						bind:checked={calculator.accumulateRewards}
+						class="form-checkbox h-5 w-5 text-blue-600"
+					/>
+					<span class="ml-2 text-gray-400">Accumulate Rewards</span>
+				</label>
 				</div>
 			</div>
 			<p class="text-sm text-gray-300 mt-2 font-bold">
@@ -462,22 +513,49 @@
 	</section>
 
 	<section>
-		<h2>Governance Voter</h2>
+		<h2>Governance Boosts</h2>
 		<ul>
-			<li>10% boost for being an active voter</li>
+			<li>1 vote: 5% boost</li>
+			<li>2-3 votes: 10% boost</li>
+			<li>4-5 votes: 15% boost</li>
+			<li>5+ votes: 20% boost</li>
 		</ul>
 	</section>
 
 	<section>
-		<h2>Season Streaks</h2>
+		<h2>Pledge Increase Boosts</h2>
 		<ul>
-			<li>5% per consecutive season (capped at 100%)</li>
+			<li>100k+ XBG: 30% boost</li>
+			<li>50k+ XBG: 20% boost</li>
+			<li>10k+ XBG: 5% boost</li>
 		</ul>
 	</section>
 
 	<section>
 		<h2>In-App Activity</h2>
 		<p>To be announced... 👀</p>
+	</section>
+
+	<section>
+		<h2>Season Streak Boost</h2>
+		<p>Earn +5% more points for each consecutive season you participate in.</p>
+		<p class="text-sm text-gray-400 mt-2">
+			5% per consecutive season = {calculator.seasonStreaks} seasons × 5% = {(calculator.streakBonus * 100).toFixed(1)}% {calculator.seasonStreaks > 20 ? '(capped at 100%)' : ''}
+		</p>
+	</section>
+
+	<section>
+		<h2>Community App Boosts</h2>
+		<p>Grind the Community App leaderboard to earn more points.</p>
+		<ul>
+			<li>Top 1%: 30% boost</li>
+			<li>Top 2.5%: 25% boost</li>
+			<li>Top 5%: 20% boost</li>
+			<li>Top 10%: 15% boost</li>
+			<li>Top 25%: 10% boost</li>
+			<li>Top 50%: 5% boost</li>
+			<li>Base Tier: 2.5% boost</li>
+		</ul>
 	</section>
 </Modal>
 
@@ -539,4 +617,13 @@
 		pointer-events: none;
 		opacity: 0.35;
 	}
+
+	.select-with-arrow {
+		background-image: url('data:image/svg+xml;charset=US-ASCII,<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z" fill="white"/></svg>');
+		background-repeat: no-repeat;
+		background-position: right 8px center;
+		padding-right: 32px;
+	}
+
+	select option, select {font-size: 14px;}
 </style>
