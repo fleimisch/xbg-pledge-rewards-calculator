@@ -8,6 +8,9 @@
 	"/api/prometheus": [
 		"src/routes/api/prometheus/+server.ts"
 	],
+	"/api/xborg": [
+		"src/routes/api/xborg/+server.ts"
+	],
 	"/charts": [],
 	"/diamonds": [
 		"src/routes/diamonds/+page.server.ts"

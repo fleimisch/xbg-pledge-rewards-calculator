@@ -9,10 +9,14 @@
 
 	class RewardsCalculator {
 		static readonly REWARDS_POOL_LIMIT = 1_000_000; // 1M XBG tokens limit
-		static readonly DEFAULT_TOTAL_STAKED = 75_000_000; // 50M XBG tokens staked
+		static readonly FALLBACK_TOTAL_STAKED = 75_000_000; // Fallback value if no data available
+		DEFAULT_TOTAL_STAKED = RewardsCalculator.FALLBACK_TOTAL_STAKED;
 
 		seasonNumber = 4;
-		rewardsReducerStillUknown = 0.40;
+		rewardsReducer = 0;
+		totalPledgedWithMultipliersData:{entries:any[], total_entries:number} = $state({entries:[], total_entries:0});
+		totalPledgedWithMultipliers = $state(0);
+		totalPledgedWithoutMultipliers = $state(0);
 
 		storage = new Storage();
 		boostModalOpen = $state(false);
@@ -29,7 +33,7 @@
 		seasonStreaks = $state(+this.storage.getCookie('seasonStreaks') || this.seasonNumber);
 		accumulateRewards = $state(true);
 		totalStakedXBG = $state(
-			+this.storage.getCookie('totalStakedXBG') || RewardsCalculator.DEFAULT_TOTAL_STAKED
+			this.DEFAULT_TOTAL_STAKED
 		);
 		communityAppTier = $state(this.storage.getCookie('communityAppTier') || 'remaining');
 		seasonLeaderboardTier = $state(this.storage.getCookie('seasonLeaderboardTier') || 'remaining');
@@ -82,10 +86,10 @@
 		);
 
 		effectiveStakedAmount = $derived(this.xbgAmount * this.totalMultiplier * this.season5Special());
-		poolShare = $derived(this.effectiveStakedAmount / this.totalStakedXBG);
-		adjustedMonthlyReward = $derived(RewardsCalculator.REWARDS_POOL_LIMIT * this.poolShare * (1 - this.rewardsReducerStillUknown));
+		poolShare = $derived(this.effectiveStakedAmount / (this.totalPledgedWithMultipliers || this.totalStakedXBG));
+		adjustedMonthlyReward = $derived(RewardsCalculator.REWARDS_POOL_LIMIT * this.poolShare * (1 - this.rewardsReducer));
 		effectiveAPY = $derived(((this.adjustedMonthlyReward * 12) / this.xbgAmount) * 100);
-		poolUtilization = $derived((this.totalStakedXBG / RewardsCalculator.REWARDS_POOL_LIMIT) * 100);
+		poolUtilization = $derived((this.totalPledgedWithMultipliers / RewardsCalculator.REWARDS_POOL_LIMIT) * 100);
 		holderScore = $derived(Math.sqrt(this.xbgAmount) * this.totalMultiplier);
 
 		monthlyRewards = $derived(this.calculateMonthlyRewards());
@@ -93,11 +97,36 @@
 		initialize() {
 			this.setupStorageSync();
 			this.clearIrrelevantCookies();
+			this.fetchLeaderboardData();
 			console.log(
 				'%csrc\routes\rewards+page.svelte:75 this.xbgAmount * this.totalMultiplier * this.season5Special()',
 				'color: #007acc;',
 				this.monthlyRewards
 			);
+		}
+
+		async fetchLeaderboardData() {
+			try {
+				const response = await fetch('/api/xborg?key=leaderboard');
+				if (!response.ok) {
+					throw new Error('Failed to fetch leaderboard data');
+				}
+				const { data } = await response.json();
+				if (data && Array.isArray(data?.entries)) {
+					this.totalPledgedWithMultipliersData = data;
+					this.totalPledgedWithMultipliers = this.totalPledgedWithMultipliersData.entries.reduce((acc, entry) => acc + (entry.pledge_amount * entry.multiplier), 0);
+					this.totalPledgedWithoutMultipliers = this.totalPledgedWithMultipliersData.entries.reduce((acc, entry) => acc + (entry.pledge_amount), 0);
+					
+					// Update DEFAULT_TOTAL_STAKED and totalStakedXBG based on the fetched data
+					this.DEFAULT_TOTAL_STAKED = this.totalPledgedWithoutMultipliers || RewardsCalculator.FALLBACK_TOTAL_STAKED;
+					this.totalStakedXBG = this.DEFAULT_TOTAL_STAKED;
+				}
+			} catch (error) {
+				console.error('Error fetching leaderboard data:', error);
+				// In case of error, ensure we use the fallback value
+				this.DEFAULT_TOTAL_STAKED = RewardsCalculator.FALLBACK_TOTAL_STAKED;
+				this.totalStakedXBG = this.DEFAULT_TOTAL_STAKED;
+			}
 		}
 
 		season5Special() {
@@ -116,7 +145,7 @@
 					let cumulativeReward = 0;
 					for (let j = 0; j <= i; j++) {
 						let monthlyReward =
-							RewardsCalculator.REWARDS_POOL_LIMIT * (cumulativeStaked / calculator.totalStakedXBG) * (1 - this.rewardsReducerStillUknown);
+							RewardsCalculator.REWARDS_POOL_LIMIT * (cumulativeStaked / (this.totalPledgedWithMultipliers || this.totalStakedXBG)) * (1 - this.rewardsReducer);
 						cumulativeReward += monthlyReward;
 						cumulativeStaked += monthlyReward;
 					}
@@ -330,8 +359,9 @@
 			<RewardInput
 				id="total-staked-xbg"
 				label="Total XBG Pledged (Current Season)"
-				link="https://xbg.xborg.com/analytics"
+				link="https://xbg.xborg.com/pledge"
 				bind:value={calculator.totalStakedXBG}
+				disabled={true}
 				min={0}
 			/>
 			<RewardInput
@@ -444,6 +474,9 @@
 			</p>
 			<p class="text-xs text-gray-300 mt-1">
 				Pool Share: {(calculator.poolShare * 100).toFixed(4)}% | Pool Utilization: {calculator.poolUtilization}%
+			</p>
+			<p class="text-xs text-gray-300 mt-1">
+				Total Pledged with Multipliers: {calculator.totalPledgedWithMultipliers.toLocaleString()} XBG
 			</p>
 		</div>
 
