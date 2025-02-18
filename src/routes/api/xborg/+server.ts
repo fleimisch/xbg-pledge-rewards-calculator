@@ -2,7 +2,7 @@ import type { RequestHandler } from './$types';
 import { Redis } from '@upstash/redis';
 import { PRIVATE_UPSTASH_REDIS_REST_URL, PRIVATE_UPSTASH_REDIS_REST_TOKEN } from '$env/static/private';
 
-const CACHE_DURATION = 6 * 60 * 60; // 6 hours in seconds
+const CACHE_DURATION = 12 * 60 * 60; // 12 hours in seconds
 const XBORG_API = 'https://xbg.xborg.com/api/v2/leaderboard';
 
 // Initialize Upstash Redis with environment variables
