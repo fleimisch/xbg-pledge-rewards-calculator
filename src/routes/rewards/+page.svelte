@@ -235,7 +235,7 @@
 		</h1>
 		<p class="text-gray-400 mb-4 mx-auto text-center">Boost Your Rewards with Governance, NFTs, Season Leaderboard and Community Activties</p>
 		<button
-			class="flex items-center gap-2 mx-auto mb-10 mt-2 align-self-center button bg-white/10 px-6 py-2 rounded-lg text-white hover:bg-white/20"
+			class="flex items-center gap-2 mx-auto mb-10 mt-2 align-self-center button bg-white/10 px-6 py-2 rounded-sm text-white hover:bg-white/20"
 			on:click={() => (calculator.boostModalOpen = true)}
 		>
 			<Xborg size={19} /> Multiplier Details
@@ -246,7 +246,7 @@
 		</div> -->
 
 		<div
-			class="text-1xl font-bold mb-5 w-full text-center bg-white/10 p-2 rounded-lg flex items-center justify-center flex-col"
+			class="text-1xl font-bold mb-5 w-full text-center bg-white/10 p-2 rounded-sm flex items-center justify-center flex-col"
 		>
 			{#if !calculator.governanceVotes}
 				<span class="text-red-500 text-sm">
@@ -268,11 +268,12 @@
 				className="flex flex-col gap-1 justify-center select-none"
 				error={!calculator.season5Special()}
 				label="Community App Leaderboard Position"
+				link="https://community.xborg.com"
 			>
 				<select
 					id="communityAppTier"
 					bind:value={calculator.communityAppTier}
-					class="w-full bg-[#1a1a1a] text-white px-3 py-2 rounded-lg border border-gray-700 focus:outline-none appearance-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-[#252525] transition-colors select-with-arrow"
+					class="w-full bg-[#1a1a1a] text-white px-3 py-2 rounded-sm border border-gray-700 focus:outline-none appearance-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-[#252525] transition-colors select-with-arrow"
 				>
 					<option value="top1" class="bg-[#1a1a1a]">Top 1%</option>
 					<option value="top2.5" class="bg-[#1a1a1a]">Top 2.5%</option>
@@ -285,12 +286,13 @@
 				
 			</RewardInput>
 			<RewardInput label="Season Leaderboard Position"
+				link="https://xbg.xborg.com/leaderboard"
 				className="flex flex-col gap-1 justify-center select-none"
 			>
 				<select
 					id="seasonLeaderboardTier"
 					bind:value={calculator.seasonLeaderboardTier}
-					class="w-full bg-[#1a1a1a] text-white px-3 py-2 rounded-lg border border-gray-700 focus:outline-none appearance-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-[#252525] transition-colors select-with-arrow"
+					class="w-full bg-[#1a1a1a] text-white px-3 py-2 rounded-sm border border-gray-700 focus:outline-none appearance-none focus:ring-2 focus:ring-blue-500 cursor-pointer hover:bg-[#252525] transition-colors select-with-arrow"
 				>
 					<option value="top1" class="bg-[#1a1a1a]">Top 1% (1-10)</option>
 					<option value="top2.5" class="bg-[#1a1a1a]">Top 2.5% (11-25)</option>
@@ -378,7 +380,7 @@
 			/> -->
 		</div>
 
-		<div class="multiplierSetting p-6 rounded-lg mb-8">
+		<div class="multiplierSetting p-6 rounded-sm mb-8">
 			<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
 				<RewardStats label="Prometheus Bonus" value={calculator.prometheusBonus * 100} />
 				<RewardStats label="Chestplate Bonus" value={calculator.chestplateBonus * 100} />
@@ -417,14 +419,14 @@
 					</h3>
 					<div class="flex items-center gap-3">
 						<p class="text-2xl text-white">{calculator.holderScore.toFixed(2)}</p>
-						<a href="https://xbg.xborg.com/leaderboard" target="_blank" class="px-3 py-1 text-sm bg-red-900/40 hover:bg-red-900/30 border border-red-900 rounded-lg text-white">View Leaderboard</a>
+						<a href="https://xbg.xborg.com/leaderboard" target="_blank" class="px-3 py-1 text-sm bg-red-900/40 hover:bg-red-900/30 border border-red-900 rounded-sm text-white">View Leaderboard</a>
 					</div>
 					<p class="text-xs text-gray-400">sqrt(pledge amount) * multiplier</p>
 				</div>
 			</div>
 		</div>
 
-		<div class="multiplierSetting p-6 rounded-lg mb-8">
+		<div class="multiplierSetting p-6 rounded-sm mb-8">
 			<h3 class="text-xl font-semibold mb-2">Rewards Summary</h3>
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div>

@@ -9,7 +9,7 @@
 	export let error: boolean = false;
 </script>
 
-<div class="multiplierSetting p-4 pb-6 rounded-lg relative {className}" class:error>
+<div class="multiplierSetting p-4 pb-6 rounded-sm relative {className}" class:error>
 	{#if label}
 		<label class="block mb-2 text-sm">{label}</label>
 	{/if}
@@ -34,7 +34,12 @@
 			>
 		{/if}
 	{:else}
-		<slot />
+		<div class="flex gap-1">
+			<slot />
+			{#if link}
+				<a href={link} target="_blank" class="button text-xs rounded-sm" title="See XBG Pledged Chart">View</a>
+			{/if}
+		</div>
 	{/if}
 </div>
 
