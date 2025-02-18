@@ -233,12 +233,12 @@
 		<h1 class="page-title md:text-6xl lg:text-7xl text-5xl font-bold mb-7 mx-auto" style="">
 			<small>XBorg Pledge</small>Rewards Calculator
 		</h1>
-		<p class="text-gray-400 mb-4 mx-auto text-center">Boost Your Rewards with NFTs and Voting</p>
+		<p class="text-gray-400 mb-4 mx-auto text-center">Boost Your Rewards with Governance, NFTs, Season Leaderboard and Community Activties</p>
 		<button
 			class="flex items-center gap-2 mx-auto mb-10 mt-2 align-self-center button bg-white/10 px-6 py-2 rounded-lg text-white hover:bg-white/20"
 			on:click={() => (calculator.boostModalOpen = true)}
 		>
-			<Xborg size={19} /> Boost Overview
+			<Xborg size={19} /> Multiplier Details
 		</button>
 
 		<!-- <div class="grid grid-cols-1 gap-6 mb-8">
@@ -358,10 +358,10 @@
 			/>
 			<RewardInput
 				id="total-staked-xbg"
-				label="Total XBG Pledged (Current Season)"
-				link="https://xbg.xborg.com/pledge"
+				label="Total XBG Pledged This Season"
 				bind:value={calculator.totalStakedXBG}
 				disabled={true}
+				sublabel="Synced automatically once per day"
 				min={0}
 			/>
 			<RewardInput
@@ -564,10 +564,7 @@
 		</ul>
 	</section>
 
-	<section>
-		<h2>In-App Activity</h2>
-		<p>To be announced... 👀</p>
-	</section>
+	
 
 	<section>
 		<h2>Season Streak Boost</h2>

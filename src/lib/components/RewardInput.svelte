@@ -47,6 +47,10 @@
 		border: 1px solid rgba(91, 91, 94, 0.55);
 	}
 
+	.multiplierSetting input[disabled] {
+		opacity: 0.4;
+	}
+
 	.multiplierSetting.error {
 		background: hsla(346, 97%, 36%, 0.285);
 		border: 1px solid rgba(234, 8, 8, 0.55);
