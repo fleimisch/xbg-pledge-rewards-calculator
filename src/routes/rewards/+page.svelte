@@ -90,7 +90,7 @@
 		adjustedMonthlyReward = $derived(RewardsCalculator.REWARDS_POOL_LIMIT * this.poolShare * (1 - this.rewardsReducer));
 		effectiveAPY = $derived(((this.adjustedMonthlyReward * 12) / this.xbgAmount) * 100);
 		poolUtilization = $derived((this.totalPledgedWithMultipliers / RewardsCalculator.REWARDS_POOL_LIMIT) * 100);
-		holderScore = $derived(Math.sqrt(this.xbgAmount) * this.totalMultiplier);
+		holderScore = $derived(Math.sqrt(this.xbgAmount * this.totalMultiplier));
 
 		monthlyRewards = $derived(this.calculateMonthlyRewards());
 
@@ -421,7 +421,7 @@
 						<p class="text-2xl text-white">{calculator.holderScore.toFixed(2)}</p>
 						<a href="https://xbg.xborg.com/leaderboard" target="_blank" class="px-3 py-1 text-sm bg-red-900/40 hover:bg-red-900/30 border border-red-900 rounded-sm text-white">View Leaderboard</a>
 					</div>
-					<p class="text-xs text-gray-400">sqrt(pledge amount) * multiplier</p>
+					<p class="text-xs text-gray-400">sqrt(pledge amount * multiplier)</p>
 				</div>
 			</div>
 		</div>
